@@ -1,0 +1,21 @@
+
+{
+  "production":{
+    "username": "exbot",
+    "password": "Kw9bMWHt4Z",
+    "database": "exbot",
+    "host": "127.0.0.1"
+    , "port":"3306"
+    , "dialect": "mariadb","logging":false, "timezone": "Etc/GMT-9"
+    ,"pool": {"max": 128,"min": 0,"idle": 10000}
+  }
+	, "development": {
+		"username": "exbot",
+		"password": "Kw9bMWHt4Z",
+		"database": "exbot",
+		"host": "127.0.0.1"
+		, "port":"3306"
+		, "dialect": "mariadb","logging":false, "timezone": "Etc/GMT-9"
+		,"pool": {"max": 128,"min": 0,"idle": 10000}
+	}
+}

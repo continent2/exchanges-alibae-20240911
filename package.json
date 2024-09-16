@@ -1,0 +1,17 @@
+{
+  "name": "exchanges-alibae-20240911",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "mariadb": "^3.3.1",
+    "mysql2": "^3.11.3",
+    "sequelize": "^5.21.13"
+  }
+}
