@@ -27,7 +27,7 @@ let N_MAX_ORDERS_A_BIN = 2
 let MAX_ORDER_AMOUNT = 10 
 let MIN_ORDER_AMOUNT = 0.1
 let DIVIDER_4_STEPSIZE = 10000
-const place_order = ( { type , price , amount } )=>{ // type : 'buy'  , 'sell'
+const place_order = ( { type , tickersymbol , price , amount } )=>{ // type : 'buy'  , 'sell'
   console.log ( 'ORDER' , type , price , amount )
 }
 

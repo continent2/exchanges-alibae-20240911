@@ -10,6 +10,7 @@ const { API_PATH } = require('../configs/binance' )
 const poissonProcess = require('poisson-process')
 const axios = require ( 'axios' )
 const { parse_orderbook } = require( '../utils/exchanges/binance' )
+const { place_order } = require ( '../utils/exchanges/common' )
 let list_tradepair = [ 'BTC_USDT' ]
 let N_BINANCE_ORDERBOOK_QUERY_COUNT = 40
 let THRESHOLD_DELTA_TO_TRIGGER_SYNC_IN_PERCENT = 1.3 // PERCENT
@@ -23,6 +24,73 @@ const is_trigger_sync = async ({ local_price , ref_price , }) =>{
   let delta_normd = ( ref_price - local_price ) / ref_price
   if ( Math.abs ( delta_normd ) > THRESHOLD_DELTA_TO_TRIGGER_SYNC_IN_PERCENT / 100 ) { return true }
   else { return false }
+}
+
+const sweep_counter_orders = async ( { tickersymbol , localprice , targetprice } ) =>{
+  let delta = localprice - targetprice
+  let signdelta = Math.sign ( delta )
+  switch ( signdelta ) {
+    case +1 : // DO SELL ( BASE CURRENCY )=> FIND BUYS , (QUOTE AMOUNT)*PRICE = BASE AMOUNT
+{      let resporders = await db[ 'orders' ].findAndCountAll ( { raw: true, where : {
+        tickersymbol ,
+        type : 'BUY' // SHORT QUOTE CURRENCY , LONG BASE/ASSET CURRENCY
+      } , offset : 0 
+      , order : [ [ 'price' , 'ASC' ] , [ 'id' , 'ASC' ]] // 
+    })
+      let minabsdeltaprice = +10000_0000_0000_0000
+      let idxatmin
+      let amountinbase = 0
+      for ( let idxorder = 0 ; idxorder < resporders?.length ; idxorder ++ ){
+        let order = resporders [ idxorder ]
+        let { price , amount } = order ; price = +price
+        let absdeltaprice = Math.abs ( price - targetprice )
+        if ( minabsdeltaprice < absdeltaprice ){ 
+          amountinbase += amount * price
+          idxatmin = idxorder 
+          minabsdeltaprice = absdeltaprice
+        }
+        else if ( minabsdeltaprice >= absdeltaprice ) {  // THE REST CASES
+          break
+        }
+      }
+      await place_order ( { type : 'marketsell', 
+        tickersymbol , 
+        price : null , 
+        amount : amountinbase })
+}
+    break 
+    case -1 : // DO BUY  => FIND SELLS (OF )
+      let resporders = await db[ 'orders'].findAndCountAll ( { raw: true,  where : {
+          tickersymbol ,
+          type : 'SELL' ,
+        } , offset : 0 
+        , order : [ [ 'price' , 'DESC'] , ['id' , 'ASC' ]]
+      })
+      let minabsdeltaprice = +10000_0000_0000_0000
+      let idxatmin
+      let amountinquote = 0
+      for ( let idxorder = 0 ; idxorder < resporders?.length ; idxorder ++ ){
+        let order = resporders [ idxorder ]
+        let { price , amount } = order ; price = +price
+        let absdeltaprice = Math.abs ( price - targetprice )
+        if ( minabsdeltaprice < absdeltaprice ){
+          amountinquote += amount / price
+          idxatmin = idxorder
+          minabsdeltaprice = absdeltaprice
+        }
+        else if ( minabsdeltaprice >= absdeltaprice ){
+          break
+        }
+      }
+      await place_order ( { type : 'marketbuy', 
+        tickersymbol , 
+        price : null , 
+        amount : amountinquote
+      })
+    break
+    case 0 : // PRICE ALREADY SYNC'ED => NOTHING TO DO ?
+    break
+  }
 }
 const main = async ()=>{
   let pp = poissonProcess.create( AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC * 1000 , async () => {
@@ -42,14 +110,16 @@ const main = async ()=>{
         midprice = j_ob_stats?.midprice
       }
       let local_strikeprice = await get_local_strikeprice ( { tickersymbol } )
-      if ( is_trigger_sync ( { local_price : local_strikeprice , ref_price : strikeprice } )){
-        
+      if ( is_trigger_sync ( { local_price : local_strikeprice , ref_price : strikeprice } )) {        
+        await sweep_counter_orders ( { tickersymbol , 
+          localprice : local_strikeprice , 
+          targetprice : strikeprice 
+        } ) 
       }
       else {}
     }
     
   })
   pp.start()
-
 }
 main ()
