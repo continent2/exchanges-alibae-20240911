@@ -34,6 +34,7 @@ const parse_orderbook = ({ j_ob })=>{
   sell_volume: 2.01002,
   total_volume: 8.28942
 } */
+let j_spot_ticker_resp = { symbol: 'BTCUSDT', price: '57727.99000000' }
 let j_ob_ex = {
   "lastUpdateId": 51764995056,
   "bids": [

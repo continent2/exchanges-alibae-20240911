@@ -1,10 +1,17 @@
 
+/* QUERY MARKET INFO => TRADE PAIR ,  MIN ORDER AMOUNT , DECIMALS
+FETCH BINANCE TICKER
+SET BIN SIZE , MIN STEP SIZE ALONG PRICE AXIS
+PLACE LIMIT SELL ORDERS
+PLACE LIMIT BUY ORDERS
+*/
+
 const db = require( '../models' )
 const axios = require( 'axios' )
 const { getRandomInt  , get_random_float } = require ( '../utils/math' )
 const { parse_orderbook } = require ( '../utils/exchanges/binance' )
-let list_tp = [ 'BTC_USDT' ]
-// let list_tp = [ 'BTC_USDT' , 'ETH_USDT' ]
+let list_tradepair = [ 'BTC_USDT' ]
+// let list_tradepair = [ 'BTC_USDT' , 'ETH_USDT' ]
 const BIN_EP_SPOT_TICKER = `https://api.binance.com/api/v3/ticker/price?symbol=`
 // EX: `https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT`
 // resp.data => { symbol: 'BTCUSDT', price: '57727.99000000' }
@@ -25,8 +32,8 @@ const place_order = ( { type , price , amount } )=>{ // type : 'buy'  , 'sell'
 }
 
 const main = async ( )=>{
-  for ( let idxsymbols = 0 ; idxsymbols < list_tp?.length ; idxsymbols ++ ){
-    let tickersymbol = list_tp [ idxsymbols ]
+  for ( let idxsymbols = 0 ; idxsymbols < list_tradepair?.length ; idxsymbols ++ ){
+    let tickersymbol = list_tradepair [ idxsymbols ]
     tickersymbol = tickersymbol.replace ( /_/g, '' )
     let ep = `${ BIN_EP_ORDERBOOK }` //    let ep = `${ BIN_EP_SPOT_TICKER }${ tickersymbol }`
     try {
