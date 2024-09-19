@@ -11,12 +11,14 @@ const poissonProcess = require('poisson-process')
 const axios = require ( 'axios' )
 const { parse_orderbook } = require( '../utils/exchanges/binance' )
 const { place_order } = require ( '../utils/exchanges/common' )
+const { gaussian } = require ( '../utils/math' )
 let list_tradepair = [ 'BTC_USDT' ]
 let N_BINANCE_ORDERBOOK_QUERY_COUNT = 40
 let THRESHOLD_DELTA_TO_TRIGGER_SYNC_IN_PERCENT = 1.3 // PERCENT
-
-let AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC = 75 
-const get_local_strikeprice = async ( { tickersymbol })=>{
+l
+let AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC = 75
+let DIVIDER_FOR_RANDOM_PRICE_DIST = 30
+const get_local_strikeprice = async ( { tickersymbol })=>{  
 }
 const is_trigger_sync = async ({ local_price , ref_price , }) =>{
   local_price = +local_price
@@ -25,7 +27,18 @@ const is_trigger_sync = async ({ local_price , ref_price , }) =>{
   if ( Math.abs ( delta_normd ) > THRESHOLD_DELTA_TO_TRIGGER_SYNC_IN_PERCENT / 100 ) { return true }
   else { return false }
 }
-
+const generate_random_limit_order = async ( { 
+  targetprice , 
+})=>{
+let DIVIDER_FOR_RANDOM_PRICE_DIST = 30
+  let price = gaussian ({ mean : targetprice , stdev : targetprice / DIVIDER_FOR_RANDOM_PRICE_DIST })
+  let amount = Math.random ()
+  await place_order ( { type : ( price < targetprice ) ? 'limitbuy' : 'limitsell' , 
+    tickersymbol , 
+    price , 
+    amount // : amountinquote
+  })
+}
 const sweep_counter_orders = async ( { tickersymbol , localprice , targetprice } ) =>{
   let delta = localprice - targetprice
   let signdelta = Math.sign ( delta )
@@ -93,7 +106,7 @@ const sweep_counter_orders = async ( { tickersymbol , localprice , targetprice }
   }
 }
 const main = async ()=>{
-  let pp = poissonProcess.create( AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC * 1000 , async () => {
+  let pp_sync = poissonProcess.create( AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC * 1000 , async () => {
     console.log( 'SYNCING' )
     for ( let idxtp = 0 ; idxtp< list_tradepair?.length ; idxtp ++ ){
       let aproms = []
@@ -115,11 +128,13 @@ const main = async ()=>{
           localprice : local_strikeprice , 
           targetprice : strikeprice 
         } ) 
-      }
-      else {}
+      } // SYNC
+      else {
+
+      } // DO NOT SYNC
     }
     
   })
-  pp.start()
+  pp_sync.start()
 }
 main ()
