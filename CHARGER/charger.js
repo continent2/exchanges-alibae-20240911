@@ -14,6 +14,7 @@ const { findall  , upsert } = require ('../utils/db')
 const { get_trade_pairs } = require( '../utils/exchanges/alibae')
 const LOGGER = console.log 
 const asyncredis = require("async-redis")
+const moment = require('moment')
 const rediscli = asyncredis.createClient()
 
 let CHARGE_PERIOD_IN_SEC = 60
@@ -54,15 +55,17 @@ const form_tp_data= tpdata=>{
     LIMIT_AMOUNT_MAX : + metadata?.limits?.amount?.max ,
     LIMIT_PRICE_MIN :  + metadata?.limits?.price?.min,
     LIMIT_PRICE_MAX :  + metadata?.limits?.price?.max ,
+    binancesymbol : `${ currency }${ pair }` 
   }
   j_tp_data_custom[ `${ tpdata?.currency }_${tpdata?.pair }`] = tpdatacustom
   return tpdatacustom
 }
 const form_tp_datas = async ( { listtp_raw } ) => { // j_tp_data_custom
+  let timestamp = moment().unix()
   for ( let idxtp = 0 ; idxtp< listtp_raw?.length ; idxtp ++ ) {
     let tpdata = listtp_raw [ idxtp ]     // 
     let tpdatacustom = form_tp_data ( tpdata )
-    await rediscli.hset ( 'TRADEPAIRS' , tpdatacustom?.symbol , JSON.stringify( tpdatacustom ) )
+    await rediscli.hset ( 'TRADEPAIRS' , tpdatacustom?.symbol , JSON.stringify( { ... tpdatacustom , timestamp } ) )
   }
 }
 let j_assets_unique = {} // entries in this has duplicates removed
@@ -77,8 +80,9 @@ const get_assets_unique =( { listtp_raw })=>{
 }
 const set_redis_assets_unique = async ( { j_assets_unique } )=>{
   let arr_assets = Object.keys( j_assets_unique )
+  let timestamp = moment().unix()
   for ( let idx = 0 ; idx < arr_assets?.length ; idx++ ){
-    await rediscli.hset ( 'ASSETS' , arr_assets[ idx ] , 1 )
+    await rediscli.hset ( 'ASSETS' , arr_assets[ idx ] , timestamp )
   }
   return
 }

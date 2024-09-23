@@ -36,11 +36,18 @@ const post_order = async ( {
         if ( Number.isFinite (+price)){}
         else { console.log( `ERROR AT post_order : arg invalid`); return null }
     }
-    let resp = await axios.post ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT( 'ORDER')}` , { currency ,pair ,type ,side ,amount ,price    })
+    let resp = await axios.post ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT( 'ORDER')}` , { 
+      currency ,
+      pair ,
+      type ,
+      side ,
+      amount ,
+      price    })
     if ( resp?.status == 200 ){ return resp?.data }
     else { console.log( `ERROR AT post_order`) ; return null }
-  }
+}
 module.exports = { 
     MAP_FUNCTION_NAME_TO_ENDPOINT ,
     get_trade_pairs ,
+    post_order
 }

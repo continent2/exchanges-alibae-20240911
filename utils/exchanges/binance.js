@@ -6,13 +6,10 @@ const parse_orderbook = ({ j_ob })=>{
   let buy_prices = j_ob?.bids.map ( elem => +elem[ 0 ])
   buy_prices.sort() // ascending
   let buy_price_head = buy_prices[ buy_prices?.length -1 ]
-
   let sell_prices = j_ob?.asks.map ( elem => +elem[ 0 ])
   sell_prices.sort() // ascending
   let sell_price_head = sell_prices[ sell_prices?.length -1 ]
-
   let midprice = ( buy_price_head + sell_price_head ) / 2
-
   const sumreduce = (a,b)=>{
     if ( Number.isFinite(a) && Number.isFinite(b) ){ return (a + b) }
     else if ( Number.isFinite(b) ){ return (b) }
@@ -21,9 +18,6 @@ const parse_orderbook = ({ j_ob })=>{
   }
   let buy_volume =  j_ob?.bids.map(e=>+e[1]).reduce (sumreduce , 0 ) // ( a , b ) => sumreduce(a[ 1 ] , b[ 1 ] ) , 0 )
   let sell_volume = j_ob?.asks.map(e=>+e[1]).reduce (sumreduce , 0 ) // reduce ( ( a , b ) => sumreduce(a[ 1 ] , b[ 1 ] ) , 0 )
-
-  // let buy_volume =  j_ob?.bids.reduce ( (a,b)=> { +a[ 1 ] + +b[ 1 ] } , 0 )
-  // let sell_volume = j_ob?.asks.reduce ( (a,b)=> +a[ 1 ] + +b[ 1 ] , 0 )
   return { buy_price_head , sell_price_head , midprice , buy_volume , sell_volume , total_volume: buy_volume + sell_volume }
 }
 /* return val : {
@@ -123,3 +117,5 @@ let j_ob_ex = {
   ]
 }
 module.exports= { parse_orderbook , j_ob_ex }
+  // let buy_volume =  j_ob?.bids.reduce ( (a,b)=> { +a[ 1 ] + +b[ 1 ] } , 0 )
+  // let sell_volume = j_ob?.asks.reduce ( (a,b)=> +a[ 1 ] + +b[ 1 ] , 0 )
