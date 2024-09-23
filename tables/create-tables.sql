@@ -1,3 +1,8 @@
+create database exbot ;
+create user 'exbot'@localhost identified by 'Kw9bMWHt4Z' ;
+grant all privileges on exbot.* to 'exbot'@localhost ;
+flush privileges ;
+
 create table settings (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT primary key,
   `createdat` datetime DEFAULT current_timestamp(),
