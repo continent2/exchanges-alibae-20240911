@@ -9,6 +9,10 @@ const conv_array_to_object = ( { arr , keyfieldname , valuefieldname })=>{
   // const res = arr.map(x => ( { [ keyfieldname ]: [ valuefieldname ]}));
   // console.log(res);
 }
+const uuidreq = require('uuid')
+
+const uuid = ()=> uuidreq.v4()
 module.exports= {
-  conv_array_to_object
+  conv_array_to_object ,
+  uuid
 }

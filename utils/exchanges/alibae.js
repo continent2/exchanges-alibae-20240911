@@ -11,9 +11,10 @@ const MAP_FUNCTION_NAME_TO_ENDPOINT = ( name )=>{
 }
 const get_trade_pairs = async ()=>{
     let resp =await axios.get ( MAP_FUNCTION_NAME_TO_ENDPOINT ( 'TRADE_PAIRS' ) )
-    if ( resp.status == 200 ) { return resp?.data } 
+    if ( resp.status == 200 && resp?.data?.length ) { return resp?.data } 
     else { console.log(`ERROR AT get_trade_pairs` ) ; return null }
 }
+
 const get_orderbook = async ( { base , quote } )=>{
     let resp = await axios.get ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT ( 'ORDERBOOK' ) }/${ base }/${ quote }`) // ???
     if ( resp?.status == 200 ){ return resp?.data }

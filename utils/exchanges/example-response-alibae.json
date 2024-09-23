@@ -1,0 +1,12 @@
+[{"metadata":{"taker":0.001,"maker":0.001,"precision":{"price":3,"amount":2},"limits":{"amount":{"min":0.01,"max":92141578},"price":{"min":0.001,"max":1000},"cost":{"min":5,"max":9000000},"leverage":{}}},"id":"067505a7-eb62-421f-8feb-f28f92ffbc2b","currency":"ZRO","pair":"USDC","isTrending":false,"isHot":false,"status":true,"isEco":false},{"metadata":{"taker":0.001,"maker":0.001,"precision":{"price":4,"amount":0},"limits":{"amount":{"min":1,"max":9222449},"price":{"min":0.0001,"max":10000},"cost":{"min":5,"max":9000000},"leverage":{}}},"id":"10fe3815-46f2-423f-972d-3bb3e0eae29f","currency":"XRP","pair":"TUSD","isTrending":false,"isHot":false,"status":true,"isEco":false},{"metadata":{"taker":0.001,"maker":0.001,"precision":{"price":0,"amount":5},"limits":{"amount":{"min":0.00001,"max":922},"price":{"min":1,"max":99928191},"cost":{"min":100,"max":9000000},"leverage":{}}},"id":"142bb6f6-0e14-4857-9528-39d9ddb5f07d","currency":"BTC","pair":"ZAR","isTrending":false,"isHot":false,"status":true,"isEco":false},{"metadata":{"taker":0.001,"maker":0.001,"precision":{"price":7,"amount":2},"limits":{"amount":{"min":0.01,"max":90000000},"price":{"min":1e-7,"max":1000},"cost":{"min":0.0001,"max":9000000},"leverage":{}}},"id":"14cf251f-1789-44c4-b0a6-9c9a0f14379e","currency":"ZEN","pair":"BTC","isTrending":false,"isHot":false,"status":true,"isEco":false},{"metadata":{"taker":0.001,"maker":0.001,"precision":{"price":4,"amount":0},"limits":{"amount":{"min":1,"max":9222449},"price":{"min":0.0001,"max":10000},"cost":{"min":5,"max":9000000},"leverage":{}}},"id":"1aa12707-6a86-4b6f-a514-c06be7200dd4","currency":"XRP","pair":"USDC","isTrending":false,"isHot":false,"status":true,"isEco":false},{"metadata":{"taker":0.001,"maker":0.001,"precision":{"price":8,"amount":0},"limits":{"amount":
+
+currency
+pair
+metadata?.precision?.price => PRECISION_PRICE
+metadata?.precision?.amount => PRECISION_AMOUNT
+metadata?.limits?.amount?.min  => LIMIT_AMOUNT_MIN
+metadata?.limits?.amount?.max  => LIMIT_AMOUNT_MAX
+metadata?.limits?.price?.min  => LIMIT_PRICE_MIN
+metadata?.limits?.price?.max  => LIMIT_PRICE_MAX
+
+
