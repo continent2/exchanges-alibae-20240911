@@ -1,6 +1,7 @@
 const axios= require( 'axios' )
 const URL = `https://alibae.io/api`
-
+// const APIKEY = '2UTcRUf0yIDCOHxgO6KfndhLE4erZxBJMOwc1nHuIhFexRPGVjoSa5xIBUxKs1Nk'
+const rediscli = require ( 'async-redis' ).createClient()
 const MAP_FUNCTION_NAME_TO_PATH = {
     TRADE_PAIRS : `exchange/market?eco=false`,
     ORDERBOOK : `exchange/orderbook` ,
@@ -8,19 +9,19 @@ const MAP_FUNCTION_NAME_TO_PATH = {
 }
 const MAP_FUNCTION_NAME_TO_ENDPOINT = ( name )=>{
     return `${ URL }/${ MAP_FUNCTION_NAME_TO_PATH[ name ]  }`
-}
+} // https://alibae.io/api/exchange/market?eco=false
 const get_trade_pairs = async ()=>{
     let resp =await axios.get ( MAP_FUNCTION_NAME_TO_ENDPOINT ( 'TRADE_PAIRS' ) )
     if ( resp.status == 200 && resp?.data?.length ) { return resp?.data } 
     else { console.log(`ERROR AT get_trade_pairs` ) ; return null }
 }
-
 const get_orderbook = async ( { base , quote } )=>{
     let resp = await axios.get ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT ( 'ORDERBOOK' ) }/${ base }/${ quote }`) // ???
     if ( resp?.status == 200 ){ return resp?.data }
     else { console.log (`ERROR AT get_orderbook`) ; return null }
 }
 const post_order = async ( {
+    useremail , apikey , 
     currency ,
     pair ,
     type ,
@@ -36,13 +37,14 @@ const post_order = async ( {
         if ( Number.isFinite (+price)){}
         else { console.log( `ERROR AT post_order : arg invalid`); return null }
     }
-    let resp = await axios.post ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT( 'ORDER')}` , { 
+    rediscli.hget ( )
+    let resp = await axios.post ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT( 'ORDER' ) }` , {
       currency ,
       pair ,
       type ,
       side ,
       amount ,
-      price    })
+      price    } , { headers : { 'X-API-KEY': apikey } } )
     if ( resp?.status == 200 ){ return resp?.data }
     else { console.log( `ERROR AT post_order`) ; return null }
 }

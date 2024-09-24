@@ -9,7 +9,8 @@ const db = require( '../models' )
 const axios = require( 'axios' )
 const { getRandomInt  , get_random_float } = require ( '../utils/math' )
 const { parse_orderbook } = require ( '../utils/exchanges/binance' )
-const rediscli = require('async-redis').createClient()  // const { place_order } = require ( '../utils/exchanges/alibae' )
+const rediscli = require( 'async-redis' ).createClient()  // 
+const { post_order : post_order_prod } = require ( '../utils/exchanges/alibae' )
 let list_tradepair = [ 'BTC_USDT' ]
 // let list_tradepair = [ 'BTC_USDT' , 'ETH_USDT' ]
 const BIN_EP_SPOT_TICKER = `https://api.binance.com/api/v3/ticker/price?symbol=`
@@ -28,7 +29,7 @@ let N_MAX_ORDERS_A_BIN = 1
 let MAX_ORDER_AMOUNT = 10 
 let MIN_ORDER_AMOUNT = 0.1
 let DIVIDER_4_STEPSIZE = 10000
-const place_order = ( { idxbin , side , type , tickersymbol_snake , price , amount } )=>{ // type : 'buy'  , 'sell'
+const place_order_local_dev = ( { idxbin , side , type , tickersymbol_snake , price , amount } )=>{ // type : 'buy'  , 'sell'
   console.log ( 'ORDER' ,idxbin , tickersymbol_snake , side , type , price , amount )
 }
 /** {
@@ -36,10 +37,22 @@ const place_order = ( { idxbin , side , type , tickersymbol_snake , price , amou
   XRP_TRY: '{"base":"XRP","quote":"TRY","symbol":"XRP_TRY","PRECISION_PRICE":2,"PRECISION_AMOUNT":0,"LIMIT_AMOUNT_MIN":1,"LIMIT_AMOUNT_MAX":92141578,"LIMIT_PRICE_MIN":0.01,"LIMIT_PRICE_MAX":1000}',
   BTC_ARS: '{"base":"BTC","quote":"ARS","symbol":"BTC_ARS","PRECISION_PRICE":0,"PRECISION_AMOUNT":5,"LIMIT_AMOUNT_MIN":0.00001,"LIMIT_AMOUNT_MAX":67,"LIMIT_PRICE_MIN":1,"LIMIT_PRICE_MAX":1356378240}',
 */
+let MODE_DEV_PROD = 'DEV' // 'PROD'
+const post_order = MODE_DEV_PROD == 'DEV' ? place_order_local_dev : post_order_prod
 const fetch_ticker_symbols = async ()=>{
   let j_ticker_symbols = await rediscli.hgetall ( 'TRADEPAIRS' )
   return j_ticker_symbols
 }
+const get_user_apikeys_from_db = async ()=>{
+  let j_useremail_keys = await rediscli.hgetall ( 'APIKEY' )
+  let arr_useremails = Object.keys ( j_useremail_keys )
+  if ( arr_useremail_apikeys?.length ){}
+  else { return null }
+  let arr_useremail_apikeys = Object.keys ( j_useremail_keys ).map ( el =>{ 
+    return { useremail : el , apikey : j_useremail_keys[ el ] }})
+  return arr_useremail_apikeys
+}
+const get_random_from_arr = (arr) => arr[ Math.floor(Math.random() * arr.length )]
 const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
   let j_ticker_symbols  = await fetch_ticker_symbols ()
   let arr_ticker_symbols = Object.keys ( j_ticker_symbols )
@@ -48,6 +61,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
   let max_iter_symbols 
   if ( MAX_STOP_SYMBOL_ITER_AT ){ max_iter_symbols = MAX_STOP_SYMBOL_ITER_AT }
   else { max_iter_symbols = list_tradepair?.length }
+  let arr_useremail_apikeys = await get_user_apikeys_from_db ()
   for ( let idxsymbols = 0 ; idxsymbols < max_iter_symbols ; idxsymbols ++ ){
     let tickersymbol_snake = list_tradepair [ idxsymbols ]
     let tickersymbol = tickersymbol_snake.replace ( /_/g, '' )
@@ -69,9 +83,13 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
   //        continue
           let n_orders = getRandomInt ( 1 , N_MAX_ORDERS_A_BIN )
           for ( let idxorder = 0 ; idxorder < n_orders ; idxorder ++ ){
-            let orderprice = get_random_float ( { max : bin_border_high , min: bin_border_low })
-            let orderamount= get_random_float ( { max : MAX_ORDER_AMOUNT , min : MIN_ORDER_AMOUNT })
-             await place_order ( {   idxbin ,
+            // let orderprice = get_random_float ( { max : bin_border_high , min: bin_border_low })
+            // let orderamount= get_random_float ( { max : MAX_ORDER_AMOUNT , min : MIN_ORDER_AMOUNT })
+            let orderprice = get_random_float ( { max : marketinfo?.LIMIT_PRICE_MAX , min: marketinfo?.LIMIT_PRICE_MIN  })
+            let orderamount= get_random_float ( { max : marketinfo?.LIMIT_AMOUNT_MAX , min : marketinfo?.LIMIT_AMOUNT_MIN })
+            let { useremail , apikey } = get_random_from_arr ( arr_useremail_apikeys )
+            await post_order ( {   idxbin ,
+              useremail , apikey , 
               currency : marketinfo?.base ,
               pair : marketinfo?.quote ,
               type : 'limit',
@@ -90,7 +108,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
           for ( let idxorder = 0 ; idxorder < n_orders ; idxorder ++ ){
             let orderprice = get_random_float ( { max : bin_border_high , min: bin_border_low })
             let orderamount= get_random_float ( { max : MAX_ORDER_AMOUNT , min : MIN_ORDER_AMOUNT })
-            await place_order ( {
+            await post_order ( {
               currency : marketinfo?.base ,
               pair : marketinfo?.quote ,
               type : 'limit',

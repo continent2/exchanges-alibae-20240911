@@ -5,7 +5,7 @@ EVERY 1 MINUTE, FETCH BOT I’S BALANCE
 BALANCE < REQUIRED ?
 CHARGE , NOP 
 */
-
+let MODE_DEV_PROD = 'DEV' // 'PROD'
 const axios = require( 'axios' )
 const db = require ( '../models' )
 const dbalibae =require('../models-alibae')
@@ -24,23 +24,53 @@ const N_COUNT_BOTS = 1
 let arr_bot_names = [... Array( N_COUNT_BOTS ).keys()].map( el => 'BOT'+(''+el).padStart(3, '0' ) )
 let arr_bot_emails= arr_bot_names.map ( el => `${ el }@gmail.com` )
 let arr_bot_ids = arr_bot_emails
+
+function generateApiKey(length = 64) {  const characters =    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let apiKey = "";
+  for (let i = 0; i < length; i++) {    apiKey += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return apiKey;
+}
 const ensure_exists_or_create_users = async () => {
   for ( let idxbot = 0 ; idxbot< arr_bot_emails?.length ; idxbot ++ ){
     let email = arr_bot_emails [ idxbot ]
-    let resp = await dbalibae[ 'user' ].findOne( {raw: true, where : { email } })
-    if ( resp ){ }
+    let respuser = await dbalibae[ 'user' ].findOne( {raw: true, where : { email } })
+    let timenow = dbalibae.sequelize.fn( 'NOW' )
+    if ( respuser ){ }
     else {
-      await dbalibae[ 'user' ].create ({ 
+      respuser = await dbalibae[ 'user' ].create ({ 
         id : uuid() ,
         email  ,
         roleId : 4,
         status : 'ACTIVE' ,
-        createdAt : dbalibae.sequelize.fn('NOW') ,
-        updatedAt : dbalibae.sequelize.fn('NOW') 
+        createdAt : timenow ,
+        updatedAt : timenow
       })
-    } 
+    }
+    let respapikey = await dbalibae[ 'api_key' ].findOne ( { raw: true , where : { userId :respuser?.id  } } )
+    if ( respapikey ){ }
+    else {  respapikey = await dbalibae[ 'api_key' ].create ( {
+      id : respuser?.id ,
+      userId: respuser?.id,
+      name: generateApiKey ( 10 ),
+      key: generateApiKey( 64 ), 
+      permissions: '[\"trade\",\"deposit\",\"transfer\",\"futures\",\"withdraw\"]' ,
+      ipWhitelist:  '[]',
+      createdAt : timenow ,
+      updatedAt : timenow ,
+    })}
+    await rediscli.hset ( 'APIKEY' , arr_bot_emails[ idxbot ] , respapikey?.key )
   }
 }
+// const newKey = await models.apiKey.create({
+//   userId: user.id,
+//   name: name,
+//   key: generateApiKey(), // Use the custom API key generator
+//   permissions: permissions || [],
+//   ipWhitelist: ipWhitelist || [],
+// });
+// INSERT INTO `api_key` VALUES ('a11b4812-52d7-40f5-be0e-0a42e43c78de','8febbd91-84c5-4f60-a44b-5aea1e19a38a','2UTcRUf0yIDCOHxgO6KfndhLE4erZxBJMOwc1nHuIhFexRPGVjoSa5xIBUxKs1Nk','2024-09-13 02:57:10','2024-09-13 02:57:10',NULL,'AK00','[\"trade\",\"deposit\",\"transfer\",\"futures\",\"withdraw\"]','[]'),('b0d2d138-fc81-4a8a-99d2-d95ca0b09df9','6735bea0-bb0f-4abd-9eee-a3a7dbfd84c1','yKrMdX4jAvHkinhGwSFnJXVzfc5gy5fRh7jzWst4HHBErVrdt2xLTBiCAMZCSNLH','2024-09-20 06:52:16','2024-09-20 06:52:16',NULL,'alibot','[\"trade\"]','[]');
+
 let j_tp_data_custom ={}
 let arr_tp_data = []
 const form_tp_data= tpdata=>{
@@ -136,13 +166,16 @@ const main = async () => {
 //  process.exit ( 1 )
   await ensure_exists_or_create_users ( )
 //  process.exit ( 1 )
-  let h = setInterval ( async ()=>{
+  let h_timeout = setTimeout ( async ()=>{
     await chargeup ()
-  } ,  CHARGE_PERIOD_IN_SEC )
+    if ( MODE_DEV_PROD == 'DEV') { process.exit ( 1 ) }  // 'PROD'
+  } ,  3 * 1000 )
+//    if ( MODE_DEV_PROD == 'DEV') { process.exit ( 1 ) }  // 'PROD'
+  let h_interval = setInterval ( async ()=>{
+    await chargeup ()    
+  } ,  CHARGE_PERIOD_IN_SEC * 1000 )
 
-// let h = setTimeout ( async ()=>{
-  //   await chargeup ()
-  // } ,  10 )
+// let h = 
 
 }
 
