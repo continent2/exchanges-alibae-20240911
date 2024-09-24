@@ -11,8 +11,11 @@ const conv_array_to_object = ( { arr , keyfieldname , valuefieldname })=>{
 }
 const uuidreq = require('uuid')
 
+const get_random_from_arr = (arr) => arr[ Math.floor(Math.random() * arr.length )]
+
 const uuid = ()=> uuidreq.v4()
 module.exports= {
   conv_array_to_object ,
-  uuid
+  uuid ,
+  get_random_from_arr
 }

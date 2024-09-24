@@ -13,7 +13,7 @@ const { parse_orderbook } = require( '../utils/exchanges/binance' )
 const { place_order } = require ( '../utils/exchanges/common' )
 const { gaussian } = require ( '../utils/math' )
 const rediscli = require ( 'async-redis' ).createClient()
-const { get_tickers, get_orderbook, post_order, post_order_with_random_pick_bot } = require ( '../utils/exchanges/alibae' )
+const { get_tickers } = require ( '../utils/exchanges/alibae' )
 // let list_tradepair = [ 'BTC_USDT' ]
 let N_BINANCE_ORDERBOOK_QUERY_COUNT = 40
 let THRESHOLD_DELTA_TO_TRIGGER_SYNC_IN_PERCENT = 1.3 // PERCENT
@@ -36,88 +36,79 @@ const is_trigger_sync = async ({ local_price , ref_price , }) =>{
   if ( Math.abs ( delta_normd ) > THRESHOLD_DELTA_TO_TRIGGER_SYNC_IN_PERCENT / 100 ) { return true }
   else { return false }
 }
+const generate_random_limit_order = async ( {
+    targetprice , 
+  })=>{
+  let DIVIDER_FOR_RANDOM_PRICE_DIST = 30
+  let price = gaussian ({ mean : targetprice , stdev : targetprice / DIVIDER_FOR_RANDOM_PRICE_DIST })
+  let amount = Math.random ()
+  await place_order ( { type : ( price < targetprice ) ? 'limitbuy' : 'limitsell' , 
+    tickersymbol , 
+    price , 
+    amount // : amountinquote
+  })
+}
 const sweep_up_counter_orders = async ( { tickersymbol , localprice , targetprice } ) =>{
   let delta = localprice - targetprice
-  let absdelta= Math.abs ( localprice - targetprice )
   let signdelta = Math.sign ( delta )
-  let [ base , quote ]  = tickersymbol.split ( /_/g )
-  let LIMIT_ORDERBOOK_QUERY_COUNT = 1000 
   switch ( signdelta ) {
     case +1 : // DO MARKET SELL ( BASE CURRENCY )=> FIND BUYS , (QUOTE AMOUNT)*PRICE = BASE AMOUNT
-    // SHORT BASE , LONG QUOTE
-    // COUNTER ORDER : LONG BASE , SHORT QUOTE
-{     let resporders = await get_orderbook ({ base  , quote  , limit : LIMIT_ORDERBOOK_QUERY_COUNT })
-/*  let resporders = await db[ 'orders' ].findAndCountAll ( { raw: true, where : {        tickersymbol ,        type : 'BUY' // SHORT QUOTE CURRENCY , LONG BASE/ASSET CURRENCY
-      } , offset : 0       , order : [ [ 'price' , 'ASC' ] , [ 'id' , 'ASC' ] ] // 
-    }) */
-      let minabsdeltaprice = absdelta
-//      let minabsdeltaprice = +1_0000_0000_0000_0000
+{      let resporders = await db[ 'orders' ].findAndCountAll ( { raw: true, where : {
+        tickersymbol ,
+        type : 'BUY' // SHORT QUOTE CURRENCY , LONG BASE/ASSET CURRENCY
+      } , offset : 0 
+      , order : [ [ 'price' , 'ASC' ] , [ 'id' , 'ASC' ] ] // 
+    })
+      let minabsdeltaprice = +10000_0000_0000_0000
       let idxatmin
-//      let amountinbase = 0
+      let amountinbase = 0
       for ( let idxorder = 0 ; idxorder < resporders?.length ; idxorder ++ ){
         let order = resporders [ idxorder ]
-        let [ price , amount ] = order
-//        let { price , amount } = order ; 
-        price = + price
-        amount = + amount
+        let { price , amount } = order ; price = +price
         let absdeltaprice = Math.abs ( price - targetprice )
-        if ( minabsdeltaprice > absdeltaprice ){ 
-//          amountinbase += amount * price
-          let amountinbase = amount * price                    
-          await post_order_with_random_pick_bot ( { // type : 'marketsell', 
-            tickersymbol , 
-//            apikey : '' ,
-            currency : base ,
-            pair : quote ,
-            type : 'market' ,
-            side : 'sell' ,
-//            price : null , 
-            amount : amountinbase 
-          } )
+        if ( minabsdeltaprice < absdeltaprice ){ 
+          amountinbase += amount * price
+          idxatmin = idxorder 
           minabsdeltaprice = absdeltaprice
-          idxatmin = idxorder
         }
-        else if ( minabsdeltaprice <= absdeltaprice ) {  // THE REST CASES
-          break
-        }
-      }      
-}
-    break 
-    case -1 : // DO MARKET BUY  => FIND SELLS (OF )
-    // SHORT QUOTE , LONG BASE
-    // COUNTER ORDER : LONG QUOTE , SHORT BASE 
-{     /** let resporders = await db[ 'orders'].findAndCountAll ( { raw: true,  where : {          tickersymbol ,          type : 'SELL' ,        } , offset : 0         , order : [ [ 'price' , 'DESC'] , ['id' , 'ASC' ]]
-      }) */
-      let resporders = await get_orderbook ( { base , quote , limit : LIMIT_ORDERBOOK_QUERY_COUNT })
-      let minabsdeltaprice = absdelta // +10000_0000_0000_0000
-      let idxatmin
-//      let amountinquote = 0
-      for ( let idxorder = 0 ; idxorder < resporders?.length ; idxorder ++ ){
-        let order = resporders [ idxorder ]
-        let [ price , amount ] = order
-//        let { price , amount } = order        
-        price = + price
-        amount = + amount
-        let absdeltaprice = Math.abs ( price - targetprice )
-        if ( minabsdeltaprice > absdeltaprice ){
-          let amountinquote = amount / price
-          await post_order_with_random_pick_bot ( { // type : 'marketsell', 
-            tickersymbol ,      //            apikey : '' ,
-            currency : base ,
-            pair : quote ,
-            type : 'market' ,
-            side : 'buy' ,
-    //            price : null , 
-            amount : amountinquote
-          } )          
-          minabsdeltaprice = absdeltaprice
-          idxatmin = idxorder
-        }
-        else if ( minabsdeltaprice <= absdeltaprice ){ // NOP
+        else if ( minabsdeltaprice >= absdeltaprice ) {  // THE REST CASES
           break
         }
       }
+      await place_order ( { type : 'marketsell', 
+        tickersymbol , 
+        price : null , 
+        amount : amountinbase })
 }
+    break 
+    case -1 : // DO BUY  => FIND SELLS (OF )
+      let resporders = await db[ 'orders'].findAndCountAll ( { raw: true,  where : {
+          tickersymbol ,
+          type : 'SELL' ,
+        } , offset : 0 
+        , order : [ [ 'price' , 'DESC'] , ['id' , 'ASC' ]]
+      })
+      let minabsdeltaprice = +10000_0000_0000_0000
+      let idxatmin
+      let amountinquote = 0
+      for ( let idxorder = 0 ; idxorder < resporders?.length ; idxorder ++ ){
+        let order = resporders [ idxorder ]
+        let { price , amount } = order ; price = +price
+        let absdeltaprice = Math.abs ( price - targetprice )
+        if ( minabsdeltaprice < absdeltaprice ){
+          amountinquote += amount / price
+          idxatmin = idxorder
+          minabsdeltaprice = absdeltaprice
+        }
+        else if ( minabsdeltaprice >= absdeltaprice ){
+          break
+        }
+      }
+      await place_order ( { type : 'marketbuy', 
+        tickersymbol , 
+        price : null , 
+        amount : amountinquote
+      })
     break
     case 0 : // PRICE ALREADY SYNC'ED => NOTHING TO DO ?
     break
@@ -159,16 +150,3 @@ const main = async ()=>{
   pp_sync.start()
 }
 main ()
-
-const generate_random_limit_order = async ( {
-  targetprice , 
-})=>{
-let DIVIDER_FOR_RANDOM_PRICE_DIST = 30
-let price = gaussian ({ mean : targetprice , stdev : targetprice / DIVIDER_FOR_RANDOM_PRICE_DIST })
-let amount = Math.random ()
-await place_order ( { type : ( price < targetprice ) ? 'limitbuy' : 'limitsell' , 
-  tickersymbol , 
-  price , 
-  amount // : amountinquote
-})
-}

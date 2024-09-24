@@ -11,6 +11,7 @@ const { getRandomInt  , get_random_float } = require ( '../utils/math' )
 const { parse_orderbook } = require ( '../utils/exchanges/binance' )
 const rediscli = require( 'async-redis' ).createClient()  // 
 const { post_order : post_order_prod } = require ( '../utils/exchanges/alibae' )
+const { get_random_from_arr } = require ( '../utils/common' )
 let list_tradepair = [ 'BTC_USDT' ]
 // let list_tradepair = [ 'BTC_USDT' , 'ETH_USDT' ]
 const BIN_EP_SPOT_TICKER = `https://api.binance.com/api/v3/ticker/price?symbol=`
@@ -52,7 +53,7 @@ const get_user_apikeys_from_db = async ()=>{
     return { useremail : el , apikey : j_useremail_keys[ el ] }})
   return arr_useremail_apikeys
 }
-const get_random_from_arr = (arr) => arr[ Math.floor(Math.random() * arr.length )]
+
 const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
   let j_ticker_symbols  = await fetch_ticker_symbols ()
   let arr_ticker_symbols = Object.keys ( j_ticker_symbols )

@@ -1,24 +1,48 @@
 const axios= require( 'axios' )
+const { get_random_from_arr } = require ( '../common')
 const URL = `https://alibae.io/api`
 // const APIKEY = '2UTcRUf0yIDCOHxgO6KfndhLE4erZxBJMOwc1nHuIhFexRPGVjoSa5xIBUxKs1Nk'
 const rediscli = require ( 'async-redis' ).createClient()
 const MAP_FUNCTION_NAME_TO_PATH = {
     TRADE_PAIRS : `exchange/market?eco=false`,
-    ORDERBOOK : `exchange/orderbook` ,
-    ORDER : `exchange/order` ,
+    ORDERBOOK   : `exchange/orderbook` ,
+    ORDER       : `exchange/order` ,
+    TICKERS     : `api/exchange/ticker`,
 }
 const MAP_FUNCTION_NAME_TO_ENDPOINT = ( name )=>{
     return `${ URL }/${ MAP_FUNCTION_NAME_TO_PATH[ name ]  }`
 } // https://alibae.io/api/exchange/market?eco=false
+const normalize_ticker_symbol = str=> { return str.replace ( /\//g , '_' ) }
+const get_tickers = async ()=>{
+  let resp = await axios.get ( this.MAP_FUNCTION_NAME_TO_ENDPOINT( 'TICKERS') ) 
+  let jtickers = {}
+  let arr_tickersymbols = Object.keys ( jtickers )
+  for ( let idx = 0 ; idx< arr_tickersymbols?.length ; idx++ ){
+    let tickersymbol = arr_tickersymbols[ idx ]
+    jtickers [ normalize_ticker_symbol ( tickersymbol ) ] = + resp[ tickersymbol ].last
+  }
+  return jtickers
+} // "ZRO/USDC": {   "last": 4.062,
 const get_trade_pairs = async ()=>{
     let resp =await axios.get ( MAP_FUNCTION_NAME_TO_ENDPOINT ( 'TRADE_PAIRS' ) )
     if ( resp.status == 200 && resp?.data?.length ) { return resp?.data } 
     else { console.log(`ERROR AT get_trade_pairs` ) ; return null }
 }
-const get_orderbook = async ( { base , quote } )=>{
-    let resp = await axios.get ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT ( 'ORDERBOOK' ) }/${ base }/${ quote }`) // ???
+const get_orderbook = async ( { base , quote , limit } )=>{
+  let jqparams = ( limit && +limit>0 ) ? { limit} : {}
+    let resp = await axios.get ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT ( 'ORDERBOOK' ) }/${ base }/${ quote }` , { params: { ... jqparams } } ) // ???
     if ( resp?.status == 200 ){ return resp?.data }
     else { console.log (`ERROR AT get_orderbook`) ; return null }
+}
+let arr_useremail_apikeys
+const get_user_apikeys_from_db = async ()=>{
+  let j_useremail_keys = await rediscli.hgetall ( 'APIKEY' )
+  let arr_useremails = Object.keys ( j_useremail_keys )
+  if ( arr_useremail_apikeys?.length ){}
+  else { return null }
+  let arr_useremail_apikeys = Object.keys ( j_useremail_keys ).map ( el =>{ 
+    return { useremail : el , apikey : j_useremail_keys[ el ] }})
+  return arr_useremail_apikeys
 }
 const post_order = async ( {
     useremail , apikey , 
@@ -48,8 +72,57 @@ const post_order = async ( {
     if ( resp?.status == 200 ){ return resp?.data }
     else { console.log( `ERROR AT post_order`) ; return null }
 }
+const post_order_with_random_pick_bot = async ( {   // useremail , apikey , 
+  currency ,
+  pair ,
+  type ,
+  side ,
+  amount ,
+  price
+  } )=>{
+  let { useremail , apikey } =  get_random_from_arr ( arr_useremail_apikeys )
+  return await post_order ( { useremail , apikey , currency ,    pair ,    type ,    side ,    amount ,    price
+  })  
+}
 module.exports = { 
     MAP_FUNCTION_NAME_TO_ENDPOINT ,
     get_trade_pairs ,
-    post_order
+    post_order ,
+    post_order_with_random_pick_bot ,
+    get_tickers ,
+    get_orderbook
+}
+const init = async ()=>{
+  arr_useremail_apikeys = await get_user_apikeys_from_db ()
+}
+init ()
+
+/*** RESPONSE TO GET TICKERS */
+if ( false ){
+  const response_example_get_tickers = {
+    "ZRO/USDC": {
+      "last": 4.062,
+      "baseVolume": 138297.51,
+      "quoteVolume": 570778.75238,
+      "change": -4.648
+    },
+    "XRP/TUSD": {
+      "last": 0.5844,
+      "baseVolume": 22760,
+      "quoteVolume": 13340.8046,
+      "change": -1.267
+    },
+    "BTC/ZAR": {
+      "last": 1100952,
+      "baseVolume": 3.00944,
+      "quoteVolume": 3280857.19382,
+      "change": -1.586
+    },
+    "ZEN/BTC": {
+      "last": 0.0001289,
+      "baseVolume": 2792.86,
+      "quoteVolume": 0.36314505,
+      "change": 0.155
+    },
+  }
 }

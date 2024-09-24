@@ -1,0 +1,392 @@
+{
+  "ZRO/USDC": {
+    "last": 4.062,
+    "baseVolume": 138297.51,
+    "quoteVolume": 570778.75238,
+    "change": -4.648
+  },
+  "XRP/TUSD": {
+    "last": 0.5844,
+    "baseVolume": 22760,
+    "quoteVolume": 13340.8046,
+    "change": -1.267
+  },
+  "BTC/ZAR": {
+    "last": 1100952,
+    "baseVolume": 3.00944,
+    "quoteVolume": 3280857.19382,
+    "change": -1.586
+  },
+  "ZEN/BTC": {
+    "last": 0.0001289,
+    "baseVolume": 2792.86,
+    "quoteVolume": 0.36314505,
+    "change": 0.155
+  },
+  "XRP/USDC": {
+    "last": 0.5844,
+    "baseVolume": 6429946,
+    "quoteVolume": 3773082.7226,
+    "change": -1.117
+  },
+  "XVG/ETH": {
+    "last": 0.00000156,
+    "baseVolume": 11097312,
+    "quoteVolume": 17.09259889,
+    "change": 1.961
+  },
+  "YGG/BTC": {
+    "last": 0.0000073,
+    "baseVolume": 83437.4,
+    "quoteVolume": 0.60555568,
+    "change": 2.528
+  },
+  "YGG/TRY": {
+    "last": 15.76,
+    "baseVolume": 92358.1,
+    "quoteVolume": 1475980.114,
+    "change": 1.416
+  },
+  "ZEC/BTC": {
+    "last": 0.0004744,
+    "baseVolume": 7422.719,
+    "quoteVolume": 3.45752525,
+    "change": -1.187
+  },
+  "XRP/BRL": {
+    "last": 3.231,
+    "baseVolume": 108424,
+    "quoteVolume": 352325.294,
+    "change": -0.707
+  },
+  "YGG/USDT": {
+    "last": 0.4603,
+    "baseVolume": 14400236.6,
+    "quoteVolume": 6668161.44923,
+    "change": 1.276
+  },
+  "XRP/MXN": {
+    "last": 11.45,
+    "baseVolume": 1698.4,
+    "quoteVolume": 19525.2828,
+    "change": -2.061
+  },
+  "BTC/PLN": {
+    "last": 243232,
+    "baseVolume": 3.89368,
+    "quoteVolume": 952697.08549,
+    "change": -0.931
+  },
+  "ZIL/ETH": {
+    "last": 0.00000578,
+    "baseVolume": 815490,
+    "quoteVolume": 4.7101021,
+    "change": 1.404
+  },
+  "BTC/FDUSD": {
+    "last": 63065.33,
+    "baseVolume": 35846.70433,
+    "quoteVolume": 2270233287.7450705,
+    "change": -1.293
+  },
+  "BTC/ARS": {
+    "last": 77199631,
+    "baseVolume": 2.34327,
+    "quoteVolume": 181309631.75392,
+    "change": -0.668
+  },
+  "ZRO/FDUSD": {
+    "last": 4.066,
+    "baseVolume": 121405.54,
+    "quoteVolume": 499759.14327,
+    "change": -4.059
+  },
+  "YGG/USDC": {
+    "last": 0.4604,
+    "baseVolume": 322837.1,
+    "quoteVolume": 150073.21947,
+    "change": 1.031
+  },
+  "ZRX/BTC": {
+    "last": 0.00000523,
+    "baseVolume": 63741,
+    "quoteVolume": 0.33138198,
+    "change": 1.553
+  },
+  "ZEN/ETH": {
+    "last": 0.003111,
+    "baseVolume": 587.54,
+    "quoteVolume": 1.82087793,
+    "change": 0.484
+  },
+  "BTC/BRL": {
+    "last": 348618,
+    "baseVolume": 126.13989,
+    "quoteVolume": 44296588.55511,
+    "change": -1.006
+  },
+  "XRP/BTC": {
+    "last": 0.00000927,
+    "baseVolume": 3771291,
+    "quoteVolume": 34.91115224,
+    "change": 0.216
+  },
+  "ZRO/BTC": {
+    "last": 0.00006438,
+    "baseVolume": 187755.12,
+    "quoteVolume": 12.24916135,
+    "change": -3.071
+  },
+  "BTC/UAH": {
+    "last": 2788472,
+    "baseVolume": 0.0674,
+    "quoteVolume": 188951.47808,
+    "change": -1.554
+  },
+  "BTC/DAI": {
+    "last": 62987.89,
+    "baseVolume": 4.99651,
+    "quoteVolume": 316391.5607838,
+    "change": -1.446
+  },
+  "BTC/USDC": {
+    "last": 63063.99,
+    "baseVolume": 2360.24841,
+    "quoteVolume": 149525333.6590703,
+    "change": -1.368
+  },
+  "ZRX/USDT": {
+    "last": 0.3286,
+    "baseVolume": 4637525,
+    "quoteVolume": 1528968.8742,
+    "change": -0.273
+  },
+  "BTC/EUR": {
+    "last": 56728.64,
+    "baseVolume": 141.94362,
+    "quoteVolume": 8089721.9872704,
+    "change": -0.918
+  },
+  "XVS/BTC": {
+    "last": 0.0001176,
+    "baseVolume": 4012.27,
+    "quoteVolume": 0.46842415,
+    "change": 0.256
+  },
+  "ZRO/USDT": {
+    "last": 4.066,
+    "baseVolume": 7606571.18,
+    "quoteVolume": 31394499.34351,
+    "change": -4.149
+  },
+  "ZK/FDUSD": {
+    "last": 0.1223,
+    "baseVolume": 553246.9,
+    "quoteVolume": 68970.88244,
+    "change": -2.394
+  },
+  "XVG/TRY": {
+    "last": 0.1401,
+    "baseVolume": 8625644,
+    "quoteVolume": 1203650.588,
+    "change": 0.937
+  },
+  "ZK/TRY": {
+    "last": 4.18,
+    "baseVolume": 4742423.9,
+    "quoteVolume": 20235693.234,
+    "change": -2.336
+  },
+  "YFI/BTC": {
+    "last": 0.0797,
+    "baseVolume": 8.02216,
+    "quoteVolume": 0.63749117,
+    "change": 1.142
+  },
+  "XRP/TRY": {
+    "last": 19.98,
+    "baseVolume": 3191205,
+    "quoteVolume": 64107273.47,
+    "change": -0.991
+  },
+  "YFI/USDT": {
+    "last": 5023,
+    "baseVolume": 282.28785,
+    "quoteVolume": 1419705.7126,
+    "change": -0.258
+  },
+  "ZEC/ETH": {
+    "last": 0.01137,
+    "baseVolume": 694.724,
+    "quoteVolume": 7.75679886,
+    "change": -1.644
+  },
+  "XRP/ETH": {
+    "last": 0.0002228,
+    "baseVolume": 600518,
+    "quoteVolume": 132.2062533,
+    "change": 0.315
+  },
+  "BTC/USDT": {
+    "last": 63070.43,
+    "baseVolume": 20844.62691,
+    "quoteVolume": 1320261413.1077197,
+    "change": -1.353
+  },
+  "XNO/USDT": {
+    "last": 0.903,
+    "baseVolume": 731589.33,
+    "quoteVolume": 681238.54774,
+    "change": -3.319
+  },
+  "BTC/TUSD": {
+    "last": 63134.58,
+    "baseVolume": 13.64147,
+    "quoteVolume": 865053.8981569,
+    "change": -1.323
+  },
+  "XVG/USDT": {
+    "last": 0.004091,
+    "baseVolume": 183013640,
+    "quoteVolume": 746520.400627,
+    "change": 0.417
+  },
+  "ZIL/TRY": {
+    "last": 0.52,
+    "baseVolume": 6797864,
+    "quoteVolume": 3569230.091,
+    "change": 0.58
+  },
+  "ZK/USDC": {
+    "last": 0.122,
+    "baseVolume": 983232.7,
+    "quoteVolume": 122765.23453,
+    "change": -2.944
+  },
+  "ZEN/USDT": {
+    "last": 8.11,
+    "baseVolume": 155613.96,
+    "quoteVolume": 1278666.3355,
+    "change": -1.338
+  },
+  "XVS/TRY": {
+    "last": 254.4,
+    "baseVolume": 5292.61,
+    "quoteVolume": 1347274.958,
+    "change": -0.819
+  },
+  "XRP/EUR": {
+    "last": 0.5254,
+    "baseVolume": 1413226,
+    "quoteVolume": 745710.7754,
+    "change": -0.737
+  },
+  "ZK/BTC": {
+    "last": 0.00000194,
+    "baseVolume": 803800.9,
+    "quoteVolume": 1.58531101,
+    "change": -1.02
+  },
+  "BTC/MXN": {
+    "last": 1232481,
+    "baseVolume": 0.720973,
+    "quoteVolume": 895999.806488,
+    "change": -1.788
+  },
+  "XRP/USDT": {
+    "last": 0.5842,
+    "baseVolume": 145045017,
+    "quoteVolume": 85147837.4203,
+    "change": -1.151
+  },
+  "BTC/RON": {
+    "last": 283024,
+    "baseVolume": 0.37001,
+    "quoteVolume": 104973.43805,
+    "change": -0.543
+  },
+  "ZIL/BTC": {
+    "last": 2.5e-7,
+    "baseVolume": 2127064,
+    "quoteVolume": 0.51098472,
+    "change": 4.167
+  },
+  "ZIL/USDT": {
+    "last": 0.01518,
+    "baseVolume": 145575683.2,
+    "quoteVolume": 2228037.106772,
+    "change": -0.066
+  },
+  "BTC/TRY": {
+    "last": 2156397,
+    "baseVolume": 106.42462,
+    "quoteVolume": 230752543.85972,
+    "change": -1.235
+  },
+  "XRP/JPY": {
+    "last": 84.07,
+    "baseVolume": 582260,
+    "quoteVolume": 49138311.34,
+    "change": -1.303
+  },
+  "XTZ/USDT": {
+    "last": 0.686,
+    "baseVolume": 3915371.4,
+    "quoteVolume": 2728547.1147,
+    "change": -1.153
+  },
+  "XVS/BNB": {
+    "last": 0.01228,
+    "baseVolume": 6054.58,
+    "quoteVolume": 75.3749216,
+    "change": -2.925
+  },
+  "XRP/BNB": {
+    "last": 0.0009698,
+    "baseVolume": 349661,
+    "quoteVolume": 339.658917,
+    "change": -2.376
+  },
+  "XVS/USDT": {
+    "last": 7.39,
+    "baseVolume": 323431.58,
+    "quoteVolume": 2408481.149,
+    "change": -1.335
+  },
+  "BTC/JPY": {
+    "last": 9077629,
+    "baseVolume": 37.014994,
+    "quoteVolume": 337351074.408676,
+    "change": -1.55
+  },
+  "XTZ/BTC": {
+    "last": 0.00001088,
+    "baseVolume": 606524.5,
+    "quoteVolume": 6.67204849,
+    "change": 0
+  },
+  "ZEC/USDT": {
+    "last": 29.87,
+    "baseVolume": 82838.942,
+    "quoteVolume": 2438877.90195,
+    "change": -2.767
+  },
+  "XRP/FDUSD": {
+    "last": 0.5843,
+    "baseVolume": 62663296,
+    "quoteVolume": 36737025.2428,
+    "change": -1.05
+  },
+  "ZRO/TRY": {
+    "last": 138.8,
+    "baseVolume": 344309.93,
+    "quoteVolume": 48495432.321,
+    "change": -4.21
+  },
+  "ZK/USDT": {
+    "last": 0.1222,
+    "baseVolume": 109427984.1,
+    "quoteVolume": 13653992.76791,
+    "change": -2.474
+  }
+}
