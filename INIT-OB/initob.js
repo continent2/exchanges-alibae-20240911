@@ -21,14 +21,14 @@ const BIN_EP_ORDERBOOK = `https://api.binance.com/api/v3/depth` // ?limit=10&sym
 // https://api.binance.com/api/v3/depth?limit=10&symbol=BTCUSDT
 
 let N_BINANCE_ORDERBOOK_QUERY_COUNT = 40
-// let N_ORDER_BINS_A_SIDE = 10
-let N_ORDER_BINS_A_SIDE = 40
-// let N_ORDER_BINS_A_SIDE = 100
 // let N_MAX_ORDERS_A_BIN = 2
 let N_MAX_ORDERS_A_BIN = 1
 let MAX_ORDER_AMOUNT = 10 
 let MIN_ORDER_AMOUNT = 0.1
 let DIVIDER_4_STEPSIZE = 10000
+// let N_ORDER_BINS_A_SIDE = 10
+let N_ORDER_BINS_A_SIDE = 40
+// let N_ORDER_BINS_A_SIDE = 100
 const place_order_local_dev = ( { idxbin , side , type , tickersymbol_snake , price , amount } )=>{ // type : 'buy'  , 'sell'
   console.log ( 'ORDER' ,idxbin , tickersymbol_snake , side , type , price , amount )
 }
@@ -74,13 +74,11 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
         console.log ( { midprice , buy_volume , sell_volume } )         
         let stepsize = +midprice / DIVIDER_4_STEPSIZE
         // let stepsize = +midprice / N_ORDER_BINS_A_SIDE
-        /** SELL */
+        /** SELL SIDE */
         for ( let idxbin = 0 ; idxbin < N_ORDER_BINS_A_SIDE ; idxbin ++ ) {
           let bin_border_low  = midprice + ( 1 + idxbin ) * stepsize
           let bin_border_high = midprice + ( 2 + idxbin ) * stepsize
-          let bin_mid         = midprice + ( 1.5+idxbin ) * stepsize
-//          LOGGER( { bin_border_low , bin_border_high , bin_mid })
-  //        continue
+          let bin_mid         = midprice + ( 1.5+idxbin ) * stepsize //          LOGGER( { bin_border_low , bin_border_high , bin_mid })   //        continue
           let n_orders = getRandomInt ( 1 , N_MAX_ORDERS_A_BIN )
           for ( let idxorder = 0 ; idxorder < n_orders ; idxorder ++ ){
             // let orderprice = get_random_float ( { max : bin_border_high , min: bin_border_low })
@@ -99,16 +97,21 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
              })
           }
         }
-        process.exit ( 1 )
-        /** BUY  */
+//        process.exit ( 1 )
+        /** BUY SIDE */
         for ( let idxbin = 0 ; idxbin < N_ORDER_BINS_A_SIDE ; idxbin ++ ) {
-          let bin_border_low = midprice - ( 2 + idxbin ) * stepsize
-          let bin_border_high= midprice - ( 1 + idxbin ) * stepsize
+          // let bin_border_low = midprice - ( 2 + idxbin ) * stepsize
+          // let bin_border_high= midprice - ( 1 + idxbin ) * stepsize
+          // let bin_mid         = midprice- ( 1.5+idxbin ) * stepsize //
           let n_orders = getRandomInt ( 1 , N_MAX_ORDERS_A_BIN )
           for ( let idxorder = 0 ; idxorder < n_orders ; idxorder ++ ){
-            let orderprice = get_random_float ( { max : bin_border_high , min: bin_border_low })
-            let orderamount= get_random_float ( { max : MAX_ORDER_AMOUNT , min : MIN_ORDER_AMOUNT })
-            await post_order ( {
+            // let orderprice = get_random_float ( { max : bin_border_high , min: bin_border_low })
+            // let orderamount= get_random_float ( { max : MAX_ORDER_AMOUNT , min : MIN_ORDER_AMOUNT })
+            let orderprice = get_random_float ( { max : marketinfo?.LIMIT_PRICE_MAX , min: marketinfo?.LIMIT_PRICE_MIN  })
+            let orderamount= get_random_float ( { max : marketinfo?.LIMIT_AMOUNT_MAX , min : marketinfo?.LIMIT_AMOUNT_MIN })
+            let { useremail , apikey } = get_random_from_arr ( arr_useremail_apikeys )
+            await post_order ( { idxbin ,
+              useremail , apikey ,
               currency : marketinfo?.base ,
               pair : marketinfo?.quote ,
               type : 'limit',
