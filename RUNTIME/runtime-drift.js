@@ -21,21 +21,21 @@ const { get_tickers, get_orderbook, post_order, post_order_with_random_pick_bot 
 const { gaussian } = require ( '../utils/math' )
 // let list_tradepair = [ 'BTC_USDT' ]
 let N_BINANCE_ORDERBOOK_QUERY_COUNT = 40
-let THRESHOLD_DELTA_TO_TRIGGER_SYNC_IN_PERCENT = 1.3 // PERCENT
+let THRESHOLD_PRICE_DELTA_TO_TRIGGER_SYNC_IN_PERCENT = 1.3 // PERCENT
 let AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC = 5 // DEV 
-let DIVIDER_FOR_RANDOM_PRICE_DIST = 30
-const LIMIT_TO_MARKET_RATIO = [ 0.7 , 0.3 ]
+let REFPRICE_DIVIDER_FOR_STDEV_OF_RANDOM_PRICE_DIST = 30
+const LIMIT_TO_MARKET_ORDER_COUNT_RATIO = [ 0.7 , 0.3 ]
 let BUY_TO_SELL_RATIO = [ 0.5 , 0.5 ]
-const ORDER_PRICE_DIST_STDEV = 0.25 // THAT MUCH FROM THE MEAN
+const ORDER_PRICE_DIST_STDEV = 0.25 // THAT MUCH AWAY FROM THE MEAN
 const decide_limit_market_random = ()=>{
-  let randsign = Math.sign ( Math.random() - LIMIT_TO_MARKET_RATIO[ 0 ] )
+  let randsign = Math.sign ( Math.random() - LIMIT_TO_MARKET_ORDER_COUNT_RATIO[ 0 ] )
   switch ( randsign ){
     case -1 : return 'limit' ; break
     case +1 : return 'market'; break
    }
 }
 const decide_buy_sell_random = ()=>{
-  let randsign = Math.sign ( Math.random() - LIMIT_TO_MARKET_RATIO[ 0 ] )
+  let randsign = Math.sign ( Math.random() - LIMIT_TO_MARKET_ORDER_COUNT_RATIO[ 0 ] )
   switch ( randsign ){
     case -1 : return 'buy' ; break 
     case +1 : return 'market' ; break
