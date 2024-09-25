@@ -131,7 +131,9 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
 }
 
 main ( { MAX_STOP_SYMBOL_ITER_AT : 1 })
-
+module.exports = {
+  main 
+}
 /* 
 QUERY MARKET INFO => TRADE PAIR ,  MIN ORDER AMOUNT , DECIMALS
 FETCH BINANCE TICKER 

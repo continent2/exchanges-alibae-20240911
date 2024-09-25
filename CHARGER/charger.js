@@ -174,9 +174,9 @@ const main = async () => {
   let h_interval = setInterval ( async ()=>{
     await chargeup ()    
   } ,  CHARGE_PERIOD_IN_SEC * 1000 )
-
 // let h = 
-
 }
-
 main ()
+module.exports = {
+  main
+}

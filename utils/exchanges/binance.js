@@ -1,7 +1,19 @@
 
 // const BIN_EP_ORDERBOOK = `https://api.binance.com/api/v3/depth?limit=10&symbol=`
 // https://api.binance.com/api/v3/depth?limit=10&symbol=BTCUSDT
-
+const sumreduce = (a,b)=>{
+  if ( Number.isFinite(a) && Number.isFinite(b) ){ return (a + b) }
+  else if ( Number.isFinite(b) ){ return (b) }
+  else if ( Number.isFinite(a) ){ return (a) }
+  else { return 0}
+}
+const get_mean_order_amount_from_orderbook = ( {j_ob_ex })=>{
+  let sum = [ 0, 0]
+  sum[ 0 ] = j_ob_ex?.bids.map(el => +el[ 1]).reduce ( (a,b) => a+b , 0 )
+  sum[ 1 ] = j_ob_ex?.asks.map(el => +el[ 1]).reduce ( (a,b) => a+b , 0 )
+  let N = j_ob_ex?.bids?.length + j_ob_ex?.asks?.length
+  return ( sum[ 0 ] + sum[ 1 ]) / N
+}
 const parse_orderbook = ({ j_ob })=>{
   let buy_prices = j_ob?.bids.map ( elem => +elem[ 0 ])
   buy_prices.sort() // ascending
@@ -10,12 +22,6 @@ const parse_orderbook = ({ j_ob })=>{
   sell_prices.sort() // ascending
   let sell_price_head = sell_prices[ sell_prices?.length -1 ]
   let midprice = ( buy_price_head + sell_price_head ) / 2
-  const sumreduce = (a,b)=>{
-    if ( Number.isFinite(a) && Number.isFinite(b) ){ return (a + b) }
-    else if ( Number.isFinite(b) ){ return (b) }
-    else if ( Number.isFinite(a) ){ return (a) }
-    else { return 0}
-  }
   let buy_volume =  j_ob?.bids.map(e=>+e[1]).reduce (sumreduce , 0 ) // ( a , b ) => sumreduce(a[ 1 ] , b[ 1 ] ) , 0 )
   let sell_volume = j_ob?.asks.map(e=>+e[1]).reduce (sumreduce , 0 ) // reduce ( ( a , b ) => sumreduce(a[ 1 ] , b[ 1 ] ) , 0 )
   return { buy_price_head , sell_price_head , midprice , buy_volume , sell_volume , total_volume: buy_volume + sell_volume }
@@ -29,6 +35,8 @@ const parse_orderbook = ({ j_ob })=>{
   total_volume: 8.28942
 } */
 let j_spot_ticker_resp = { symbol: 'BTCUSDT', price: '57727.99000000' }
+module.exports= { parse_orderbook , get_mean_order_amount_from_orderbook } //  j_ob_ex ,
+
 let j_ob_ex = {
   "lastUpdateId": 51764995056,
   "bids": [
@@ -116,6 +124,6 @@ let j_ob_ex = {
     ]
   ]
 }
-module.exports= { parse_orderbook , j_ob_ex }
+
   // let buy_volume =  j_ob?.bids.reduce ( (a,b)=> { +a[ 1 ] + +b[ 1 ] } , 0 )
   // let sell_volume = j_ob?.asks.reduce ( (a,b)=> +a[ 1 ] + +b[ 1 ] , 0 )

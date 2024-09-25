@@ -9,7 +9,7 @@ const { default: axios } = require('axios')
 const { API_PATH } = require('../configs/binance' )
 const poissonProcess = require('poisson-process')
 const axios = require ( 'axios' )
-const { parse_orderbook } = require( '../utils/exchanges/binance' )
+const { parse_orderbook , get_mean_order_amount_from_orderbook } = require( '../utils/exchanges/binance' )
 const { place_order } = require ( '../utils/exchanges/common' )
 const { gaussian } = require ( '../utils/math' )
 const rediscli = require ( 'async-redis' ).createClient()
@@ -138,11 +138,16 @@ const main = async ()=>{
       aproms[ aproms?.length ] = axios.get ( `${ API_PATH?.BIN_EP_ORDERBOOK    }` , { params : { limit : N_BINANCE_ORDERBOOK_QUERY_COUNT , symbol : tickersymbol_binance }} )
       let aresps = await Promise.all ( aproms )
       let ref_strikeprice , midprice , j_ob , j_ob_stats
-      if ( aresps [ 0 ] && aresps [0].data && aresps [0].data?.price ){ ref_strikeprice = +aresps [0].price }
+      if ( aresps [ 0 ] && aresps [0].data && aresps [0].data?.price ){ ref_strikeprice = +aresps [0].price
+        await rediscli.hset ( 'REF_STRIKEPRICE' , tickersymbol , ref_strikeprice )
+      }
       if ( aresps [ 1 ] && aresps [1].data && aresps [1].data?.bids  ){
         j_ob = aresps [1].data
         j_ob_stats = parse_orderbook( { j_ob } )
         midprice = j_ob_stats?.midprice
+        await rediscli.hset ( 'REF_MIDPRICE' , tickersymbol , midprice )
+        let mean_order_amount = get_mean_order_amount_from_orderbook ( aresps[ 1 ].data )
+        await rediscli.hset ( 'REF_MEAN_ORDER_AMOUNT' , tickersymbol , mean_order_amount )
       }
       let local_strikeprice = j_tickersymbol_prices [ tickersymbol ] // let local_strikeprice = await get_local_strikeprice ( { tickersymbol } )      
       if ( is_trigger_sync ( { local_price : local_strikeprice , ref_price : ref_strikeprice } )) {        
