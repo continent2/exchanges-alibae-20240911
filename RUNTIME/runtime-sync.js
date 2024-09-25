@@ -177,3 +177,7 @@ await place_order ( { type : ( price < targetprice ) ? 'limitbuy' : 'limitsell' 
   amount // : amountinquote
 })
 }
+
+module.exports = {
+  main
+}

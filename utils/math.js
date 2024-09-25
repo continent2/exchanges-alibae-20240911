@@ -24,7 +24,7 @@ const gaussian_with_polarity = ( { mean , stdev , polarity } )=>{ //  function g
   }
   return z * stdev + mean // Transform to the desired mean and standard deviation: //}
 }
-module.exports= {
+module.exports = {
   get_random_float ,
   getRandomInt ,
   gaussian ,
