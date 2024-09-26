@@ -15,11 +15,14 @@ const { get_trade_pairs } = require( '../utils/exchanges/alibae')
 const LOGGER = console.log 
 const asyncredis = require("async-redis")
 const moment = require('moment')
-const rediscli = asyncredis.createClient()
-
+const { URL_REDIS_CONN  } = require ( '../configs/redis' )
+const { KEYNAMES } = require('../configs/keynames')
+const rediscli = asyncredis.createClient( URL_REDIS_CONN?.DEFAULT )
+let h_interval 
 let CHARGE_PERIOD_IN_SEC = 60
 let CHARGE_UPTO_TARGET_AMOUNT = 100_0000_0000
-const N_COUNT_BOTS = 1
+let CHARGE_INITIAL_DELAY_IN_SEC = 1
+const N_COUNT_BOTS =  1
 // const N_COUNT_BOTS = 15
 let arr_bot_names = [... Array( N_COUNT_BOTS ).keys()].map( el => 'BOT'+(''+el).padStart(3, '0' ) )
 let arr_bot_emails= arr_bot_names.map ( el => `${ el }@gmail.com` )
@@ -156,27 +159,49 @@ const chargeup= async () => {
   form_tp_datas ( { listtp_raw } )
 //  for ( let idxbot = 0 ; idxbot < arr_bot_emails?.length ; idxbot ++ ) {   }
 }
-const main = async () => {
+const create_common_channel_subscriber = async (  )=>{
+  let resp = await rediscli.subscribe ( KEYNAMES?.REDIS?.CHANNEL_NAME_COMMON , strmessage => { 
+    LOGGER ( { strmessage } )
+    let message = JSON.parse ( strmessage )
+    if ( message && message?.receiver == KEYNAMES?.REDIS?.RECEIVERS?.CHARGER ){
+      if ( message.action ){ 
+        switch ( message.action ){
+          case KEYNAMES?.REDIS?.ACTIONS?.RESTART : 
+          case KEYNAMES?.REDIS?.ACTIONS?.START :
+            main ()
+          break
+          default :           break
+        }
+      }
+    } else {}
+  })
+  return resp
+}
+const init = async ()=>{
   let respsettings = await findall ( 'settings' , { group : 'CHARGE' , active : 1 } )
   let jsettings = conv_array_to_object ( {arr: respsettings , keyfieldname : 'key' , valuefieldname:'value'})
   if (jsettings[ 'CHARGE_PERIOD_IN_SEC' ] && Number.isFinite( +jsettings[ 'CHARGE_PERIOD_IN_SEC' ] ) ){ CHARGE_PERIOD_IN_SEC = +jsettings['CHARGE_PERIOD_IN_SEC'] } // 
   else {}
   if (jsettings[ 'CHARGE_UPTO_TARGET_AMOUNT' ] && Number.isFinite ( +jsettings[ 'CHARGE_UPTO_TARGET_AMOUNT' ] ) ){ CHARGE_UPTO_TARGET_AMOUNT = +jsettings['CHARGE_UPTO_TARGET_AMOUNT'] }
   else {}
-//  process.exit ( 1 )
-  await ensure_exists_or_create_users ( )
-//  process.exit ( 1 )
+  if (jsettings[ 'CHARGE_INITIAL_DELAY_IN_SEC' ] && Number.isFinite ( +jsettings[ 'CHARGE_INITIAL_DELAY_IN_SEC' ] ) ){ CHARGE_INITIAL_DELAY_IN_SEC = +jsettings['CHARGE_INITIAL_DELAY_IN_SEC'] }
+  else {}
+  await create_common_channel_subscriber ()
+}
+const main = async () => {
+  await init () //  process.exit ( 1 )
+  await ensure_exists_or_create_users ( ) //  process.exit ( 1 )
   let h_timeout = setTimeout ( async ()=>{
-    await chargeup ()
+    await chargeup ( )
     if ( MODE_DEV_PROD == 'DEV') { process.exit ( 1 ) }  // 'PROD'
-  } ,  3 * 1000 )
-//    if ( MODE_DEV_PROD == 'DEV') { process.exit ( 1 ) }  // 'PROD'
-  let h_interval = setInterval ( async ()=>{
-    await chargeup ()    
-  } ,  CHARGE_PERIOD_IN_SEC * 1000 )
-// let h = 
+  } ,  CHARGE_INITIAL_DELAY_IN_SEC * 1000 ) //    if ( MODE_DEV_PROD == 'DEV') { process.exit ( 1 ) }  // 'PROD'
+  if ( h_interval ) { clearInterval ( h_interval ) }
+  h_interval = setInterval ( async ()=>{
+    await chargeup ()
+  } , CHARGE_PERIOD_IN_SEC * 1000 )
 }
 main ()
 module.exports = {
   main
 }
+
