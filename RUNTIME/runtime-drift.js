@@ -75,17 +75,9 @@ const parse_setting_params=async ()=>{
   else {}
   if ( jsettings[ 'ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK' ] && Number.isFinite( +jsettings[ 'ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK' ])){ ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK = +jsettings[ 'ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK' ] }
   else {}
-
 }
 const main = async ()=>{
-  let AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC = 5 // DEV 
-let LIMIT_TO_MARKET_ORDER_COUNT_RATIO = [ 0.7 , 0.3 ]
-let BUY_TO_SELL_FREQ_RATIO = [ 0.5 , 0.5 ]
-let ORDER_PRICE_DIST_STDEV = 0.25 // THAT MUCH AWAY FROM THE MEAN
-let ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK = +0.01
-
-
-  conv_array_to_object ()
+  await parse_setting_params()
   let pp_sync = poissonProcess.create( AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC * 1000 , async () => {
     let jtickersymbol_ref_strikeprices = await rediscli.hgetall ( KEYNAMES?.REDIS?.REF_STRIKEPRICE )
     let jtickersymbol_ref_midprices = await rediscli.hgetall ( KEYNAMES?.REDIS?.REF_MIDPRICE )
