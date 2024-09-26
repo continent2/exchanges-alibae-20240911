@@ -19,14 +19,17 @@ const rediscli = require ( 'async-redis' ).createClient()
 const { KEYNAMES } = require( '../configs/keynames' )
 const { get_tickers, get_orderbook, post_order, post_order_with_random_pick_bot } = require ( '../utils/exchanges/alibae' )
 const { gaussian } = require ( '../utils/math' )
+const { conv_array_to_object } = require('../utils/common')
 // let list_tradepair = [ 'BTC_USDT' ]
-let N_BINANCE_ORDERBOOK_QUERY_COUNT = 40
-let THRESHOLD_PRICE_DELTA_TO_TRIGGER_SYNC_IN_PERCENT = 1.3 // PERCENT
 let AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC = 5 // DEV 
-let REFPRICE_DIVIDER_FOR_STDEV_OF_RANDOM_PRICE_DIST = 30
-const LIMIT_TO_MARKET_ORDER_COUNT_RATIO = [ 0.7 , 0.3 ]
-let BUY_TO_SELL_RATIO = [ 0.5 , 0.5 ]
-const ORDER_PRICE_DIST_STDEV = 0.25 // THAT MUCH AWAY FROM THE MEAN
+let LIMIT_TO_MARKET_ORDER_COUNT_RATIO = [ 0.7 , 0.3 ]
+let BUY_TO_SELL_FREQ_RATIO = [ 0.5 , 0.5 ]
+let ORDER_PRICE_DIST_STDEV = 0.25 // THAT MUCH AWAY FROM THE MEAN
+let ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK = +0.01
+// let N_BINANCE_ORDERBOOK_QUERY_COUNT = 40
+// let THRESHOLD_PRICE_DELTA_TO_TRIGGER_SYNC_IN_PERCENT = 1.3 // PERCENT
+// let REFPRICE_DIVIDER_FOR_STDEV_OF_RANDOM_PRICE_DIST = 30
+
 const decide_limit_market_random = ()=>{
   let randsign = Math.sign ( Math.random() - LIMIT_TO_MARKET_ORDER_COUNT_RATIO[ 0 ] )
   switch ( randsign ){
@@ -43,7 +46,6 @@ const decide_buy_sell_random = ()=>{
 }
 // AMOUNT @SELL SIDE => SHORT BASE
 // AMOUNT @BUY  SIDE => SHORT QUOTE
-const ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK = +0.01
 const decide_amount_random = async ( { tickersymbol } )=>{
   let mean_amount = ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK
   let resp = await rediscli.hget ( KEYNAMES?.REDIS?.REF_MEAN_ORDER_AMOUNT , tickersymbol )
@@ -60,7 +62,30 @@ const decide_price_random = ( { pricemean , pricestdevnorm , side })=>{
     polarity : MAP_SIDE_POLARITY [ side ]
   } )
 }
+const parse_setting_params=async ()=>{
+  let respsettings = await db[ 'settings'].findAll ( { raw: true , where : { group: 'DRIFT' , active : 1 } } )
+  let jsettings = conv_array_to_object( { arr: respsettings , keyfieldname : 'key' , valuefieldname : 'value' })
+  if ( jsettings[ 'AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC' ] && Number.isFinite( +jsettings[ 'AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC' ])){ AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC = +jsettings[ 'AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC' ] }
+  else {}
+  if ( jsettings[ 'LIMIT_TO_MARKET_ORDER_COUNT_RATIO' ] ){ LIMIT_TO_MARKET_ORDER_COUNT_RATIO = JSON.parse( jsettings[ 'LIMIT_TO_MARKET_ORDER_COUNT_RATIO' ] )  }
+  else {}
+  if ( jsettings[ 'BUY_TO_SELL_FREQ_RATIO' ] ){ BUY_TO_SELL_FREQ_RATIO = JSON.parse( jsettings[ 'BUY_TO_SELL_FREQ_RATIO' ] ) }
+  else {}
+  if ( jsettings[ 'ORDER_PRICE_DIST_STDEV' ] && Number.isFinite( +jsettings[ 'ORDER_PRICE_DIST_STDEV' ])){ ORDER_PRICE_DIST_STDEV = +jsettings[ 'ORDER_PRICE_DIST_STDEV' ] }
+  else {}
+  if ( jsettings[ 'ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK' ] && Number.isFinite( +jsettings[ 'ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK' ])){ ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK = +jsettings[ 'ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK' ] }
+  else {}
+
+}
 const main = async ()=>{
+  let AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC = 5 // DEV 
+let LIMIT_TO_MARKET_ORDER_COUNT_RATIO = [ 0.7 , 0.3 ]
+let BUY_TO_SELL_FREQ_RATIO = [ 0.5 , 0.5 ]
+let ORDER_PRICE_DIST_STDEV = 0.25 // THAT MUCH AWAY FROM THE MEAN
+let ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK = +0.01
+
+
+  conv_array_to_object ()
   let pp_sync = poissonProcess.create( AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC * 1000 , async () => {
     let jtickersymbol_ref_strikeprices = await rediscli.hgetall ( KEYNAMES?.REDIS?.REF_STRIKEPRICE )
     let jtickersymbol_ref_midprices = await rediscli.hgetall ( KEYNAMES?.REDIS?.REF_MIDPRICE )

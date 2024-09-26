@@ -14,11 +14,12 @@ const { place_order } = require ( '../utils/exchanges/common' )
 const { gaussian } = require ( '../utils/math' )
 const rediscli = require ( 'async-redis' ).createClient()
 const { get_tickers, get_orderbook, post_order, post_order_with_random_pick_bot } = require ( '../utils/exchanges/alibae' )
+const { conv_array_to_object } = require('../utils/common')
 // let list_tradepair = [ 'BTC_USDT' ]
-let N_BINANCE_ORDERBOOK_QUERY_COUNT = 40
+let N_BINANCE_ORDERBOOK_ORDER_QUERY_COUNT_A_SIDE = 40
 let THRESHOLD_PRICE_DELTA_TO_TRIGGER_SYNC_IN_PERCENT = 1.3 // PERCENT
 let AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC = 75
-let REFPRICE_DIVIDER_FOR_STDEV_OF_RANDOM_PRICE_DIST = 30
+// let REFPRICE_D IVIDER_FOR_STDEV_OF_RANDOM_PRICE_DIST = 30
 const get_local_strikeprice = async ( { tickersymbol } )=>{
 }
 const get_tickersymbols = async ()=>{   // let j_ticker_symbols  = await fetch_ticker_symbols ()
@@ -124,6 +125,15 @@ const sweep_up_counter_orders = async ( { tickersymbol , localprice , targetpric
   }
 }
 const main = async ()=>{
+  let respsettings = await db[ 'settings'].findAll ( { raw: true , where : { group: 'SYNC' , active : 1 } } )
+  let jsettings = conv_array_to_object ( { arr : respsettings, keyfieldname : 'key', valuefieldname : 'value' })
+  if ( jsettings[ 'N_BINANCE_ORDERBOOK_ORDER_QUERY_COUNT_A_SIDE' ] && Number.isFinite(+jsettings[ 'N_BINANCE_ORDERBOOK_ORDER_QUERY_COUNT_A_SIDE' ]) ){ N_BINANCE_ORDERBOOK_ORDER_QUERY_COUNT_A_SIDE = +jsettings[ 'N_BINANCE_ORDERBOOK_ORDER_QUERY_COUNT_A_SIDE' ] }
+  else {}
+  if ( jsettings[ 'THRESHOLD_PRICE_DELTA_TO_TRIGGER_SYNC_IN_PERCENT' ] && Number.isFinite(+jsettings[ 'THRESHOLD_PRICE_DELTA_TO_TRIGGER_SYNC_IN_PERCENT' ]) ){ THRESHOLD_PRICE_DELTA_TO_TRIGGER_SYNC_IN_PERCENT = +jsettings[ 'THRESHOLD_PRICE_DELTA_TO_TRIGGER_SYNC_IN_PERCENT' ] }
+  else {}
+  if ( jsettings[ 'AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC' ] && Number.isFinite(+jsettings[ 'AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC' ]) ){ AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC = +jsettings[ 'AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC' ] }
+  else {}
+
   let pp_sync = poissonProcess.create( AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC * 1000 , async () => {
     console.log( 'SYNCING TO REF' )
     let { j_ticker_symbols , arr_ticker_symbols , list_tradepair } = await get_tickersymbols ()
@@ -135,7 +145,7 @@ const main = async ()=>{
       let tickersymbol = list_tradepair[ idxtp ]
       let tickersymbol_binance = tickersymbol.replace ( /_/g, '' )
       aproms[ aproms?.length ] = axios.get ( `${ API_PATH?.BIN_EP_SPOT_TICKER  }${ tickersymbol_binance }` )
-      aproms[ aproms?.length ] = axios.get ( `${ API_PATH?.BIN_EP_ORDERBOOK    }` , { params : { limit : N_BINANCE_ORDERBOOK_QUERY_COUNT , symbol : tickersymbol_binance }} )
+      aproms[ aproms?.length ] = axios.get ( `${ API_PATH?.BIN_EP_ORDERBOOK    }` , { params : { limit : N_BINANCE_ORDERBOOK_ORDER_QUERY_COUNT_A_SIDE , symbol : tickersymbol_binance }} )
       let aresps = await Promise.all ( aproms )
       let ref_strikeprice , midprice , j_ob , j_ob_stats
       if ( aresps [ 0 ] && aresps [0].data && aresps [0].data?.price ){ ref_strikeprice = +aresps [0].price
@@ -165,18 +175,18 @@ const main = async ()=>{
 }
 main ()
 
-const generate_random_limit_order = async ( {
+/* const generate_random_limit_order = async ( {
   targetprice , 
 })=>{
-let REFPRICE_DIVIDER_FOR_STDEV_OF_RANDOM_PRICE_DIST = 30
-let price = gaussian ({ mean : targetprice , stdev : targetprice / REFPRICE_DIVIDER_FOR_STDEV_OF_RANDOM_PRICE_DIST })
-let amount = Math.random ()
-await place_order ( { type : ( price < targetprice ) ? 'limitbuy' : 'limitsell' , 
-  tickersymbol , 
-  price , 
-  amount // : amountinquote
-})
-}
+  let REFPRICE_DIVIDER_FOR_STDEV_OF_ RANDOM_PRICE_DIST = 30
+  let price = gaussian ({ mean : targetprice , stdev : targetprice / REFPRICE_DIVIDER_FOR_S TDEV_OF_RANDOM_PRICE_DIST })
+  let amount = Math.random ()
+  await place_order ( { type : ( price < targetprice ) ? 'limitbuy' : 'limitsell' , 
+    tickersymbol , 
+    price , 
+    amount // : amountinquote
+  })
+} */
 
 module.exports = {
   main

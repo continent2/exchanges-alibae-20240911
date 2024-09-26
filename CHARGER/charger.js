@@ -157,11 +157,11 @@ const chargeup= async () => {
 //  for ( let idxbot = 0 ; idxbot < arr_bot_emails?.length ; idxbot ++ ) {   }
 }
 const main = async () => {
-  let resp = await findall ( 'settings' , {} )
-  let jsettings = conv_array_to_object ( {arr: resp , keyfieldname : 'key' , valuefieldname:'value'})
-  if (jsettings[ 'CHARGE_PERIOD_IN_SEC' ] && +jsettings[ 'CHARGE_PERIOD_IN_SEC' ] ){ CHARGE_PERIOD_IN_SEC = +jsettings['CHARGE_PERIOD_IN_SEC'] }
+  let respsettings = await findall ( 'settings' , { group : 'CHARGE' , active : 1 } )
+  let jsettings = conv_array_to_object ( {arr: respsettings , keyfieldname : 'key' , valuefieldname:'value'})
+  if (jsettings[ 'CHARGE_PERIOD_IN_SEC' ] && Number.isFinite( +jsettings[ 'CHARGE_PERIOD_IN_SEC' ] ) ){ CHARGE_PERIOD_IN_SEC = +jsettings['CHARGE_PERIOD_IN_SEC'] } // 
   else {}
-  if (jsettings[ 'CHARGE_UPTO_TARGET_AMOUNT' ] && +jsettings[ 'CHARGE_UPTO_TARGET_AMOUNT' ] ){ CHARGE_UPTO_TARGET_AMOUNT = +jsettings['CHARGE_UPTO_TARGET_AMOUNT'] }
+  if (jsettings[ 'CHARGE_UPTO_TARGET_AMOUNT' ] && Number.isFinite ( +jsettings[ 'CHARGE_UPTO_TARGET_AMOUNT' ] ) ){ CHARGE_UPTO_TARGET_AMOUNT = +jsettings['CHARGE_UPTO_TARGET_AMOUNT'] }
   else {}
 //  process.exit ( 1 )
   await ensure_exists_or_create_users ( )

@@ -11,7 +11,8 @@ const { getRandomInt  , get_random_float } = require ( '../utils/math' )
 const { parse_orderbook } = require ( '../utils/exchanges/binance' )
 const rediscli = require( 'async-redis' ).createClient()  // 
 const { post_order : post_order_prod } = require ( '../utils/exchanges/alibae' )
-const { get_random_from_arr } = require ( '../utils/common' )
+const { get_random_from_arr, conv_array_to_object } = require ( '../utils/common' )
+const { findall } = require('../utils/db')
 let list_tradepair = [ 'BTC_USDT' ]
 // let list_tradepair = [ 'BTC_USDT' , 'ETH_USDT' ]
 const BIN_EP_SPOT_TICKER = `https://api.binance.com/api/v3/ticker/price?symbol=`
@@ -26,7 +27,7 @@ let N_BINANCE_ORDERBOOK_QUERY_COUNT = 40
 let N_MAX_ORDERS_A_BIN = 1
 let MAX_ORDER_AMOUNT = 10 
 let MIN_ORDER_AMOUNT = 0.1
-let DIVIDER_4_STEPSIZE = 10000
+let REF_PRICE_DIVIDER_FOR_BIN_WIDTH = 1_0000
 // let N_ORDER_BINS_A_SIDE = 10
 let N_ORDER_BINS_A_SIDE = 40
 // let N_ORDER_BINS_A_SIDE = 100
@@ -45,7 +46,7 @@ const fetch_ticker_symbols = async ()=>{
   return j_ticker_symbols
 }
 const get_user_apikeys_from_db = async ()=>{
-  let j_useremail_keys = await rediscli.hgetall ( 'APIKEY' )
+  let j_useremail_keys = await rediscli.hgetall (  'APIKEY' )
   let arr_useremails = Object.keys ( j_useremail_keys )
   if ( arr_useremail_apikeys?.length ){}
   else { return null }
@@ -55,6 +56,10 @@ const get_user_apikeys_from_db = async ()=>{
 }
 
 const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
+  let respsettings = await findall( 'settings' , { group : 'MM' , active : 1 } )
+  let jsettings = conv_array_to_object ( { arr : respsettings , keyfieldname : 'key' })
+  if ( jsettings[ 'REF_PRICE_DIVIDER_FOR_BIN_WIDTH' ] && +jsettings[ 'REF_PRICE_DIVIDER_FOR_BIN_WIDTH'] ) { REF_PRICE_DIVIDER_FOR_BIN_WIDTH = +jsettings[ 'REF_PRICE_DIVIDER_FOR_BIN_WIDTH'] }
+  else {}
   let j_ticker_symbols  = await fetch_ticker_symbols ()
   let arr_ticker_symbols = Object.keys ( j_ticker_symbols )
   if( true ) {  list_tradepair = arr_ticker_symbols }
@@ -73,7 +78,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
       if ( resp?.data?.asks?.length ){ //        let { price : midprice } = resp?.data
         let { midprice , buy_volume , sell_volume } = parse_orderbook ( { j_ob : resp?.data })
         console.log ( { midprice , buy_volume , sell_volume } )         
-        let stepsize = +midprice / DIVIDER_4_STEPSIZE
+        let stepsize = +midprice / REF_PRICE_DIVIDER_FOR_BIN_WIDTH
         // let stepsize = +midprice / N_ORDER_BINS_A_SIDE
         /** SELL SIDE */
         for ( let idxbin = 0 ; idxbin < N_ORDER_BINS_A_SIDE ; idxbin ++ ) {
