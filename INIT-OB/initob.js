@@ -119,7 +119,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
               amount : orderamount ,
               price : orderprice , tickersymbol_snake
              })
-             LOGGER ( { resp })
+             LOGGER ( { resp } )
           }
         }
         continue
