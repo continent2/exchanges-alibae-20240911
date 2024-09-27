@@ -27,9 +27,9 @@ let N_MAX_ORDERS_A_BIN = 1
 let MAX_ORDER_AMOUNT = 10 
 let MIN_ORDER_AMOUNT = 0.1
 let REF_PRICE_DIVIDER_FOR_BIN_WIDTH = 1_0000
-// let N_ORDER_BINS_A_SIDE = 10
+// let N_O RDER_BINS_A_SIDE = 10
 let N_ORDER_BINS_A_SIDE = 40
-// let N_ORDER_BINS_A_SIDE = 100
+// let N_ORDER_BI NS_A_SIDE = 100
 let arr_useremail_apikeys
 const place_order_local_dev = ( { idxbin , side , type , tickersymbol_snake , price , amount } )=>{ // type : 'buy'  , 'sell'
   console.log ( 'ORDER' ,idxbin , tickersymbol_snake , side , type , price , amount )
@@ -88,10 +88,10 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
     try {
       let resp = await axios.get ( ep , { params : { limit : N_BINANCE_ORDERBOOK_QUERY_COUNT , symbol : tickersymbol }} )
       if ( resp?.data?.asks?.length ){ //        let { price : midprice } = resp?.data
-        let { midprice , buy_volume , sell_volume } = parse_orderbook ( { j_ob : resp?.data })
-        console.log ( { midprice , buy_volume , sell_volume } )         
+        let { midprice , buy_volume , sell_volume } = parse_orderbook ( { j_ob : resp?.data } )        
         let stepsize = +midprice / REF_PRICE_DIVIDER_FOR_BIN_WIDTH
-        // let stepsize = +midprice / N_ORDER_BINS_A_SIDE
+        console.log ( { midprice , buy_volume , sell_volume , stepsize } )        
+        // let stepsize = +midprice / N_ORDE R_BINS_A_SIDE
         /** SELL SIDE */
         for ( let idxbin = 0 ; idxbin < N_ORDER_BINS_A_SIDE ; idxbin ++ ) {
           let bin_border_low  = midprice + ( 1 + idxbin ) * stepsize
