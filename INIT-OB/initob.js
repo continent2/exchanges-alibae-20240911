@@ -43,7 +43,7 @@ const place_order_local_dev = ( { idxbin , side , type , tickersymbol_snake , pr
 let MODE_DEV_PROD = 'DEV' // 'PROD'
 const post_order = MODE_DEV_PROD == 'DEV' ? place_order_local_dev : post_order_prod
 const fetch_ticker_symbols = async ()=>{
-  let j_ticker_symbols 
+  let j_ticker_symbols = {}
   switch ( MODE_TEST_1 ){ 
     case true : {
       let SELECT_TEST_PAIR = 'BTC_USDT'

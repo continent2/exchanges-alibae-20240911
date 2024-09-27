@@ -19,8 +19,6 @@ CREATE TABLE `settings` (
 insert into settings ( `group` , `key` , `value`,active ) values ( 'CHARGE', 'CHARGE_UPTO_AMOUNT' , '100_0000_0000' , 1 ) ; -- 10 Billions
 insert into settings ( `group` , `key` , `value`,active ) values ( 'CHARGE', 'CHARGE_PERIOD_IN_SEC' , '120',1 ) ;
 insert into settings ( `group` , `key` , `value`, active ) values ( 'CHARGE', 'CHARGE_INITIAL_DELAY_IN_SEC' , 1, 1 ) ;
-
-
 insert into settings ( `group` , `key` , `value`, active ) values ( 'MM', 'REF_PRICE_DIVIDER_FOR_BIN_WIDTH' , '10000', 1 ) ;
 insert into settings ( `group` , `key` , `value`, active ) values ( 'SYNC', 'N_BINANCE_ORDERBOOK_ORDER_QUERY_COUNT_A_SIDE' , 200 , 1 ) ;
 insert into settings ( `group` , `key` , `value`, active ) values ( 'SYNC', 'THRESHOLD_PRICE_DELTA_TO_TRIGGER_SYNC_IN_PERCENT' , '1.3', 1 ) ;
