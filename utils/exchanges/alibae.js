@@ -73,7 +73,7 @@ const post_order = async ( {
       amount ,
       price    } , { headers : { 'X-API-KEY': apikey } } )
     if ( resp?.status == 200 ){ return resp?.data }
-    else { console.log( `ERROR AT post_order`) ; return null }
+    else { console.log( `ERROR AT post_order`) ; return resp }
 }
 const post_order_with_random_pick_bot = async ( {   // useremail , apikey , 
   currency ,

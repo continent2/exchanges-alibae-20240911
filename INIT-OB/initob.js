@@ -110,7 +110,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
 //            let { useremail , apikey } = get_random_from_arr ( arr_useremail_apikeys )
             LOGGER ( "{ useremail , apikey }" )
 //            continue 
-            await post_order_with_random_pick_bot ( {   idxbin ,
+            let resp = await post_order_with_random_pick_bot ( { idxbin ,
               useremail , apikey , 
               currency : marketinfo?.base ,
               pair : marketinfo?.quote ,
@@ -119,6 +119,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
               amount : orderamount ,
               price : orderprice , tickersymbol_snake
              })
+             LOGGER ( { resp })
           }
         }
         continue
