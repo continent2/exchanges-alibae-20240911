@@ -19,10 +19,8 @@ let list_tradepair = [ 'BTC_USDT' ]
 const BIN_EP_SPOT_TICKER = `https://api.binance.com/api/v3/ticker/price?symbol=`
 // EX: `https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT`
 // resp.data => { symbol: 'BTCUSDT', price: '57727.99000000' }
-
 const BIN_EP_ORDERBOOK = `https://api.binance.com/api/v3/depth` // ?limit=10&symbol=`
 // https://api.binance.com/api/v3/depth?limit=10&symbol=BTCUSDT
-
 let N_BINANCE_ORDERBOOK_QUERY_COUNT = 40
 // let N_MAX_ORDERS_A_BIN = 2
 let N_MAX_ORDERS_A_BIN = 1
@@ -32,6 +30,7 @@ let REF_PRICE_DIVIDER_FOR_BIN_WIDTH = 1_0000
 // let N_ORDER_BINS_A_SIDE = 10
 let N_ORDER_BINS_A_SIDE = 40
 // let N_ORDER_BINS_A_SIDE = 100
+let arr_useremail_apikeys
 const place_order_local_dev = ( { idxbin , side , type , tickersymbol_snake , price , amount } )=>{ // type : 'buy'  , 'sell'
   console.log ( 'ORDER' ,idxbin , tickersymbol_snake , side , type , price , amount )
 }
@@ -61,7 +60,8 @@ const get_user_apikeys_from_db = async ()=>{
   let arr_useremails = Object.keys ( j_useremail_keys )
   if ( arr_useremail_apikeys?.length ){}
   else { return null }
-  let arr_useremail_apikeys = Object.keys ( j_useremail_keys ).map ( el =>{ 
+//  let arr_useremail_ap ikeys = Object.keys ( j_useremail_keys ).map ( el =>{ 
+  arr_useremail_apikeys = Object.keys ( j_useremail_keys ).map ( el =>{ 
     return { useremail : el , apikey : j_useremail_keys[ el ] }})
   return arr_useremail_apikeys
 }
@@ -78,7 +78,8 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
   let max_iter_symbols 
   if ( MAX_STOP_SYMBOL_ITER_AT ){ max_iter_symbols = MAX_STOP_SYMBOL_ITER_AT }
   else { max_iter_symbols = list_tradepair?.length }
-  let arr_useremail_apikeys = await get_user_apikeys_from_db ()
+  arr_useremail_apikeys = await get_user_apikeys_from_db ()
+//  let arr_useremail_a pikeys = await get_user_apikeys_from_db ()
   for ( let idxsymbols = 0 ; idxsymbols < max_iter_symbols ; idxsymbols ++ ){
     let tickersymbol_snake = list_tradepair [ idxsymbols ]
     let tickersymbol = tickersymbol_snake.replace ( /_/g, '' )
