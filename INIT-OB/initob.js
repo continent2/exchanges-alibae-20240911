@@ -5,6 +5,7 @@ SET BIN SIZE , MIN STEP SIZE ALONG PRICE AXIS
 PLACE LIMIT SELL ORDERS
 PLACE LIMIT BUY ORDERS
 */
+const MODE_TEST_1 = true // 'TEST_1'
 const db = require( '../models' )
 const axios = require( 'axios' )
 const { getRandomInt  , get_random_float } = require ( '../utils/math' )
@@ -42,7 +43,17 @@ const place_order_local_dev = ( { idxbin , side , type , tickersymbol_snake , pr
 let MODE_DEV_PROD = 'DEV' // 'PROD'
 const post_order = MODE_DEV_PROD == 'DEV' ? place_order_local_dev : post_order_prod
 const fetch_ticker_symbols = async ()=>{
-  let j_ticker_symbols = await rediscli.hgetall ( 'TRADEPAIRS' )
+  let j_ticker_symbols 
+  switch ( MODE_TEST_1 ){ 
+    case true : {
+      let SELECT_TEST_PAIR = 'BTC_USDT'
+      let resp = await rediscli.hget ( 'TRADEPAIRS' , SELECT_TEST_PAIR )
+      j_ticker_symbols [ SELECT_TEST_PAIR ]  = resp
+    }
+    break
+    default :   j_ticker_symbols= await rediscli.hgetall ( 'TRADEPAIRS' )
+    break
+  }  
   return j_ticker_symbols
 }
 const get_user_apikeys_from_db = async ()=>{
@@ -60,7 +71,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
   let jsettings = conv_array_to_object ( { arr : respsettings , keyfieldname : 'key' })
   if ( jsettings[ 'REF_PRICE_DIVIDER_FOR_BIN_WIDTH' ] && +jsettings[ 'REF_PRICE_DIVIDER_FOR_BIN_WIDTH'] ) { REF_PRICE_DIVIDER_FOR_BIN_WIDTH = +jsettings[ 'REF_PRICE_DIVIDER_FOR_BIN_WIDTH'] }
   else {}
-  let j_ticker_symbols  = await fetch_ticker_symbols ()
+  let j_ticker_symbols  = await fetch_ticker_symbols ()  
   let arr_ticker_symbols = Object.keys ( j_ticker_symbols )
   if( true ) {  list_tradepair = arr_ticker_symbols }
   else {    list_tradepair = [ 'BTC_USDT' ] }
@@ -86,11 +97,11 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
           let bin_border_high = midprice + ( 2 + idxbin ) * stepsize
           let bin_mid         = midprice + ( 1.5+idxbin ) * stepsize //          LOGGER( { bin_border_low , bin_border_high , bin_mid })   //        continue
           let n_orders = getRandomInt ( 1 , N_MAX_ORDERS_A_BIN )
-          for ( let idxorder = 0 ; idxorder < n_orders ; idxorder ++ ){
-            // let orderprice = get_random_float ( { max : bin_border_high , min: bin_border_low })
-            // let orderamount= get_random_float ( { max : MAX_ORDER_AMOUNT , min : MIN_ORDER_AMOUNT })
-            let orderprice = get_random_float ( { max : marketinfo?.LIMIT_PRICE_MAX , min: marketinfo?.LIMIT_PRICE_MIN  })
-            let orderamount= get_random_float ( { max : marketinfo?.LIMIT_AMOUNT_MAX , min : marketinfo?.LIMIT_AMOUNT_MIN })
+          for ( let idxorder = 0 ; idxorder < n_orders ; idxorder ++ ) {
+            let orderprice = get_random_float ( { max : bin_border_high   , min : bin_border_low })
+            let orderamount= get_random_float ( { max : MAX_ORDER_AMOUNT  , min : MIN_ORDER_AMOUNT })
+            // let orderprice = get_random_float ( { max : marketinfo?.LIMIT_PRICE_MAX , min: marketinfo?.LIMIT_PRICE_MIN  })
+            // let orderamount= get_random_float ( { max : marketinfo?.LIMIT_AMOUNT_MAX , min : marketinfo?.LIMIT_AMOUNT_MIN })
             let { useremail , apikey } = get_random_from_arr ( arr_useremail_apikeys )
             await post_order ( {   idxbin ,
               useremail , apikey , 
@@ -106,15 +117,15 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
 //        process.exit ( 1 )
         /** BUY SIDE */
         for ( let idxbin = 0 ; idxbin < N_ORDER_BINS_A_SIDE ; idxbin ++ ) {
-          // let bin_border_low = midprice - ( 2 + idxbin ) * stepsize
-          // let bin_border_high= midprice - ( 1 + idxbin ) * stepsize
-          // let bin_mid         = midprice- ( 1.5+idxbin ) * stepsize //
+          let bin_border_low = midprice - ( 2 + idxbin ) * stepsize
+          let bin_border_high= midprice - ( 1 + idxbin ) * stepsize
+          let bin_mid         = midprice- ( 1.5+idxbin ) * stepsize //
           let n_orders = getRandomInt ( 1 , N_MAX_ORDERS_A_BIN )
-          for ( let idxorder = 0 ; idxorder < n_orders ; idxorder ++ ){
-            // let orderprice = get_random_float ( { max : bin_border_high , min: bin_border_low })
-            // let orderamount= get_random_float ( { max : MAX_ORDER_AMOUNT , min : MIN_ORDER_AMOUNT })
-            let orderprice = get_random_float ( { max : marketinfo?.LIMIT_PRICE_MAX , min: marketinfo?.LIMIT_PRICE_MIN  })
-            let orderamount= get_random_float ( { max : marketinfo?.LIMIT_AMOUNT_MAX , min : marketinfo?.LIMIT_AMOUNT_MIN })
+          for ( let idxorder = 0 ; idxorder < n_orders ; idxorder ++ ) {
+            let orderprice = get_random_float ( { max : bin_border_high   , min : bin_border_low } )
+            let orderamount= get_random_float ( { max : MAX_ORDER_AMOUNT  , min : MIN_ORDER_AMOUNT })
+            // let orderprice = get_random_float ( { max : marketinfo?.LIMIT_PRICE_MAX , min: marketinfo?.LIMIT_PRICE_MIN  })
+            // let orderamount= get_random_float ( { max : marketinfo?.LIMIT_AMOUNT_MAX , min : marketinfo?.LIMIT_AMOUNT_MIN })
             let { useremail , apikey } = get_random_from_arr ( arr_useremail_apikeys )
             await post_order ( { idxbin ,
               useremail , apikey ,

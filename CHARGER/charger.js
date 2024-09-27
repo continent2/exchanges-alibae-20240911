@@ -17,7 +17,8 @@ const asyncredis = require("async-redis")
 const moment = require('moment')
 const { URL_REDIS_CONN  } = require ( '../configs/redis' )
 const { KEYNAMES } = require('../configs/keynames')
-const rediscli = asyncredis.createClient( URL_REDIS_CONN?.DEFAULT )
+const redisclihash = asyncredis.createClient( ) // URL_REDIS_CONN?.LOCAL )
+const redisclimsg  = asyncredis.createClient( URL_REDIS_CONN?.DEFAULT)
 let h_interval 
 let CHARGE_PERIOD_IN_SEC = 60
 let CHARGE_UPTO_TARGET_AMOUNT = 100_0000_0000
@@ -62,7 +63,7 @@ const ensure_exists_or_create_users = async () => {
       createdAt : timenow ,
       updatedAt : timenow ,
     })}
-    await rediscli.hset ( 'APIKEY' , arr_bot_emails[ idxbot ] , respapikey?.key )
+    await redisclihash.hset ( KEYNAMES?.REDIS?.APIKEY , arr_bot_emails[ idxbot ] , respapikey?.key )
   }
 }
 // const newKey = await models.apiKey.create({
@@ -98,7 +99,7 @@ const form_tp_datas = async ( { listtp_raw } ) => { // j_tp_data_custom
   for ( let idxtp = 0 ; idxtp< listtp_raw?.length ; idxtp ++ ) {
     let tpdata = listtp_raw [ idxtp ]     // 
     let tpdatacustom = form_tp_data ( tpdata )
-    await rediscli.hset ( 'TRADEPAIRS' , tpdatacustom?.symbol , JSON.stringify( { ... tpdatacustom , timestamp } ) )
+    await redisclihash.hset ( 'TRADEPAIRS' , tpdatacustom?.symbol , JSON.stringify( { ... tpdatacustom , timestamp } ) )
   }
 }
 let j_assets_unique = {} // entries in this has duplicates removed
@@ -115,19 +116,19 @@ const set_redis_assets_unique = async ( { j_assets_unique } )=>{
   let arr_assets = Object.keys( j_assets_unique )
   let timestamp = moment().unix()
   for ( let idx = 0 ; idx < arr_assets?.length ; idx++ ){
-    await rediscli.hset ( 'ASSETS' , arr_assets[ idx ] , timestamp )
+    await redisclihash.hset ( 'ASSETS' , arr_assets[ idx ] , timestamp )
   }
   return
 }
 const chargeup_user_wallets_by_assets = async ( { j_assets_unique , arr_bot_ids }) => {
    arr_assets = Object.keys( j_assets_unique ) 
-   LOGGER ( {arr_assets } )
+   LOGGER ( {count : arr_assets?.length , arr_assets } )
 //   process.exit ( 1 )
   for ( let idxbot = 0 ; idxbot < arr_bot_ids?.length ; idxbot ++ ){
     let botid = arr_bot_ids [ idxbot ]
     let respuser = await dbalibae[ 'user'].findOne ( {raw: true , where : { email : botid }} )
     for ( let idxasset = 0 ; idxasset < arr_assets?.length ; idxasset ++ ){
-      upsert ( { db: dbalibae , 
+      await upsert ( { db: dbalibae , 
         table : 'wallet' ,
         values : { status : 1 , 
           balance : CHARGE_UPTO_TARGET_AMOUNT  ,
@@ -141,7 +142,7 @@ const chargeup_user_wallets_by_assets = async ( { j_assets_unique , arr_bot_ids 
     }
   }
 }
-const chargeup= async () => {
+const chargeup = async () => {
   let listtp_raw = await get_trade_pairs ()
   let listtp_custom
   if ( listtp_raw ){}
@@ -156,11 +157,12 @@ const chargeup= async () => {
 //  process.exit ( 1 )
   await chargeup_user_wallets_by_assets ( { j_assets_unique , arr_bot_ids })  
   /**  TRADING PAIRS */
-  form_tp_datas ( { listtp_raw } )
+  // LOGGER ( { listtp_raw  } )
+  await form_tp_datas ( { listtp_raw } )
 //  for ( let idxbot = 0 ; idxbot < arr_bot_emails?.length ; idxbot ++ ) {   }
 }
 const create_common_channel_subscriber = async (  )=>{
-  let resp = await rediscli.subscribe ( KEYNAMES?.REDIS?.CHANNEL_NAME_COMMON , strmessage => { 
+  let resp = await redisclimsg.subscribe ( KEYNAMES?.REDIS?.CHANNEL_NAME_COMMON , strmessage => { 
     LOGGER ( { strmessage } )
     let message = JSON.parse ( strmessage )
     if ( message && message?.receiver == KEYNAMES?.REDIS?.RECEIVERS?.CHARGER ){

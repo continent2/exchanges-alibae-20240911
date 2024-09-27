@@ -1,10 +1,11 @@
 const axios= require( 'axios' )
 const { get_random_from_arr } = require ( '../common')
+const { KEYNAMES } = require('../../configs/keynames')
 const URL = `https://alibae.io/api`
 // const APIKEY = '2UTcRUf0yIDCOHxgO6KfndhLE4erZxBJMOwc1nHuIhFexRPGVjoSa5xIBUxKs1Nk'
 const rediscli = require ( 'async-redis' ).createClient()
 const MAP_FUNCTION_NAME_TO_PATH = {
-    TRADE_PAIRS : `exchange/market?eco=false`,
+    TRADEPAIRS : `exchange/market?eco=false`,
     ORDERBOOK   : `exchange/orderbook` ,
     ORDER       : `exchange/order` ,
     TICKERS     : `api/exchange/ticker`,
@@ -24,7 +25,7 @@ const get_tickers = async ()=>{
   return jtickers
 } // "ZRO/USDC": {   "last": 4.062,
 const get_trade_pairs = async ()=>{
-    let resp =await axios.get ( MAP_FUNCTION_NAME_TO_ENDPOINT ( 'TRADE_PAIRS' ) )
+    let resp =await axios.get ( MAP_FUNCTION_NAME_TO_ENDPOINT ( 'TRADEPAIRS' ) )
     if ( resp.status == 200 && resp?.data?.length ) { return resp?.data } 
     else { console.log(`ERROR AT get_trade_pairs` ) ; return null }
 }
@@ -36,8 +37,10 @@ const get_orderbook = async ( { base , quote , limit } )=>{
 }
 let arr_useremail_apikeys
 const get_user_apikeys_from_db = async ()=>{
-  let j_useremail_keys = await rediscli.hgetall ( 'APIKEY' )
+  let j_useremail_keys = await rediscli.hgetall ( KEYNAMES?.REDIS?.APIKEY )
   let arr_useremails = Object.keys ( j_useremail_keys )
+  if ( arr_useremail_apikeys?.length ){}
+  else { arr_useremail_apikeys = await get_user_apikeys_from_db () } 
   if ( arr_useremail_apikeys?.length ){}
   else { return null }
   let arr_useremail_apikeys = Object.keys ( j_useremail_keys ).map ( el =>{ 
@@ -61,7 +64,7 @@ const post_order = async ( {
         if ( Number.isFinite (+price)){}
         else { console.log( `ERROR AT post_order : arg invalid`); return null }
     }
-    rediscli.hget ( )
+//    red iscli.hget ( )
     let resp = await axios.post ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT( 'ORDER' ) }` , {
       currency ,
       pair ,
@@ -95,7 +98,7 @@ module.exports = {
 const init = async ()=>{
   arr_useremail_apikeys = await get_user_apikeys_from_db ()
 }
-init ()
+// init ()
 
 /*** RESPONSE TO GET TICKERS */
 if ( false ){
