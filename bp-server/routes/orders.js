@@ -3,7 +3,7 @@ var router = express.Router();
 const dbalibae = require( '../../models-alibae' )
 const {v4: uuid }= require( 'uuid' )
 /* GET users listing. */
-
+const LOGGER = console.log
 router.get ( '/' , async (req,res) => {
   console.log ( 'HIT EP')
   res.status(200 ).send ({ status : 'OK' , message: 'ALRIGHT' })
@@ -17,6 +17,7 @@ router.post('/order', async (req, res, next) => {
     amount ,
     price ,  
   } = req?.body
+  LOGGER( { ... req?.body })
   if ( currency && pair && type && side && amount ){}
   else { res.status(400).send ( { status:'ERR' , message:'ARG-MISSING' } ) ; return }
   let timenow = new Date().toISOString()
