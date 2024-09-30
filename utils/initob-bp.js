@@ -47,30 +47,30 @@ const main = async ()=>{
           feeCurrency : pair ,  
         })
       }
+      for ( let order of resp?.data?.bids ){
+        let timenow = new Date().toISOString()
+        let amount = +order[ 1 ] // / +order [ 0 ] 
+        await dbalibae[ 'exchange_order' ].create ( { 
+          symbol : `${currency}/${pair}` ,
+          type : 'limit',
+          side : 'buy',
+          amount , // : +order[ 1 ] / +order [ 0 ] ,
+          price  : +order[ 0 ],
+          id : uuid() ,
+          userId : 'b1c6cc9b-42c9-40ec-8606-f1329e57e358' ,
+          createdAt : timenow ,
+          updatedAt : timenow ,
+          status : 'OPEN' ,
+          timeInForce : 'GTC' ,
+          filled : 0 ,
+          remaining : amount ,
+          cost : 0 ,
+          fee : 0 , 
+          feeCurrency : pair ,  
+        })
+      }
     }
     else {}
-    for ( let order of resp?.data?.bids ){
-      let timenow = new Date().toISOString()
-      let amount = +order[ 1 ] // / +order [ 0 ] 
-      await dbalibae[ 'exchange_order' ].create ( { 
-        symbol : `${currency}/${pair}` ,
-        type : 'limit',
-        side : 'buy',
-        amount , // : +order[ 1 ] / +order [ 0 ] ,
-        price  : +order[ 0 ],
-        id : uuid() ,
-        userId : 'b1c6cc9b-42c9-40ec-8606-f1329e57e358' ,
-        createdAt : timenow ,
-        updatedAt : timenow ,
-        status : 'OPEN' ,
-        timeInForce : 'GTC' ,
-        filled : 0 ,
-        remaining : amount ,
-        cost : 0 ,
-        fee : 0 , 
-        feeCurrency : pair ,  
-      })
-    }
   }
 //    list_tradepair = [ 'BTC_USDT' ] 
 }
