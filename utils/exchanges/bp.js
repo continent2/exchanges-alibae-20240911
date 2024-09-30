@@ -13,7 +13,37 @@ const MAP_FUNCTION_NAME_TO_PATH = {
 const MAP_FUNCTION_NAME_TO_ENDPOINT = ( name )=>{
   return `${ URL }/${ MAP_FUNCTION_NAME_TO_PATH[ name ]  }`
 } // https://alibae.io/api/exchange/market?eco=false
+const post_order = async ( {
+  useremail , apikey , 
+  currency ,
+  pair ,
+  type ,
+  side ,
+  amount ,
+  price
+}  ) =>{
+  if ( currency && pair && type && side && amount ){}
+  else { console.log(`ERROR AT post_order : arg missing` ) ; return null }
+  if ( Number.isFinite(+amount) ){}
+  else { console.log(`ERROR AT post_order : arg invalid-amount` ) ; return null }
+  if ( price ){
+      if ( Number.isFinite (+price)){}
+      else { console.log( `ERROR AT post_order : arg invalid`); return null }
+  }
+//    red iscli.hget ( )
+  let resp = await axios.post ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT( 'ORDER' ) }` , {
+    currency ,
+    pair ,
+    type ,
+    side ,
+    amount ,
+    price } ) // , { headers : { 'X-API-KEY': apikey } } )
+  if ( resp?.status == 200 ){ return resp?.data }
+  else { console.log( `ERROR AT post_order`) ; return resp }
+}
 
 module.exports = { 
   MAP_FUNCTION_NAME_TO_ENDPOINT ,
+  post_order ,
+
 }

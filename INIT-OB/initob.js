@@ -12,6 +12,7 @@ const { getRandomInt  , get_random_float } = require ( '../utils/math' )
 const { parse_orderbook } = require ( '../utils/exchanges/binance' )
 const rediscli = require( 'async-redis' ).createClient()  // 
 const { post_order : post_order_prod , post_order_with_random_pick_bot } = require ( '../utils/exchanges/alibae' )
+const { post_order : post_order_bp } = require ( '../utils/exchanges/bp')
 const { get_random_from_arr, conv_array_to_object } = require ( '../utils/common' )
 const { findall } = require('../utils/db')
 let list_tradepair = [ 'BTC_USDT' ]
@@ -110,7 +111,18 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
 //            let { useremail , apikey } = get_random_from_arr ( arr_useremail_apikeys )
             LOGGER ( "{ useremail , apikey }" )
 //            continue 
-            let resp = await post_order_with_random_pick_bot ( { idxbin ,
+            let resp 
+            if ( true ){
+              resp = await post_order_bp ({
+                currency ,
+                pair ,
+                type ,
+                side ,
+                amount ,
+                price            
+              })
+            }
+            else { resp = await post_order_with_random_pick_bot ( { idxbin ,
               useremail , apikey , 
               currency : marketinfo?.base ,
               pair : marketinfo?.quote ,
@@ -120,6 +132,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
               price : orderprice , tickersymbol_snake
              })
              LOGGER ( { resp } )
+            }
           }
         }
         continue
