@@ -77,14 +77,14 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
   else {}
   let j_ticker_symbols  = await fetch_ticker_symbols ()  
   let arr_ticker_symbols = Object.keys ( j_ticker_symbols )
-  if( true ) {  list_tradepair = arr_ticker_symbols }
+  if( false ) {  list_tradepair = arr_ticker_symbols }
   else {    list_tradepair = [ 'BTC_USDT' ] }
   let max_iter_symbols 
   if ( MAX_STOP_SYMBOL_ITER_AT ){ max_iter_symbols = MAX_STOP_SYMBOL_ITER_AT }
   else { max_iter_symbols = list_tradepair?.length }
   arr_useremail_apikeys = await get_user_apikeys_from_db ()
 //  let arr_useremail_a pikeys = await get_user_apikeys_from_db ()
-  for ( let idxsymbols = 0 ; idxsymbols < max_iter_symbols ; idxsymbols ++ ){
+  for ( let idxsymbols = 0 ; idxsymbols < max_iter_symbols && idxsymbols < list_tradepair?.length ; idxsymbols ++ ){
     let tickersymbol_snake = list_tradepair [ idxsymbols ]
     let tickersymbol = tickersymbol_snake.replace ( /_/g, '' )
     let marketinfo = JSON.parse ( j_ticker_symbols [ tickersymbol_snake ] )
@@ -120,7 +120,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
                 side ,
                 amount ,
                 price            
-              })
+              }) ; LOGGER ( { resp })
             }
             else { resp = await post_order_with_random_pick_bot ( { idxbin ,
               useremail , apikey , 
@@ -167,7 +167,8 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
 //    process.exit ( 1 )
   }
 }
-main ( { MAX_STOP_SYMBOL_ITER_AT : 10 } )
+// main ( { MAX_STOP_SYMBOL_ITER_AT : 10 } )
+main ( { MAX_STOP_SYMBOL_ITER_AT : 1  } )
 module.exports = {
   main ,
   get_user_apikeys_from_db
