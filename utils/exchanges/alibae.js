@@ -5,7 +5,7 @@ const URL = `https://alibae.io/api`
 // const APIKEY = '2UTcRUf0yIDCOHxgO6KfndhLE4erZxBJMOwc1nHuIhFexRPGVjoSa5xIBUxKs1Nk'
 const rediscli = require ( 'async-redis' ).createClient()
 const MAP_FUNCTION_NAME_TO_PATH = {
-    TRADEPAIRS : `exchange/market?eco=false`,
+    TRADEPAIRS  : `exchange/market?eco=false`,
     ORDERBOOK   : `exchange/orderbook` ,
     ORDER       : `exchange/order` ,
     TICKERS     : `api/exchange/ticker`,

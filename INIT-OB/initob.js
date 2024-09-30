@@ -154,7 +154,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
 //    process.exit ( 1 )
   }
 }
-main ( { MAX_STOP_SYMBOL_ITER_AT : 1 })
+main ( { MAX_STOP_SYMBOL_ITER_AT : 10 } )
 module.exports = {
   main ,
   get_user_apikeys_from_db
