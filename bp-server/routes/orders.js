@@ -3,6 +3,11 @@ var router = express.Router();
 const dbalibae = require( '../../models-alibae' )
 const {v4: uuid }= require( 'uuid' )
 /* GET users listing. */
+
+router.get ( '/' , async (req,res) => {
+  console.log ( 'HIT EP')
+  res.status(200 ).send ({ status : 'OK' , message: 'ALRIGHT' })
+})
 router.post('/order', async (req, res, next) => {
   let { 
     currency ,
