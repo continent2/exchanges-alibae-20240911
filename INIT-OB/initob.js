@@ -109,7 +109,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
             // let orderprice = get_random_float ( { max : marketinfo?.LIMIT_PRICE_MAX , min: marketinfo?.LIMIT_PRICE_MIN  })
             let orderamount= get_random_float ( { max : marketinfo?.LIMIT_AMOUNT_MAX , min : marketinfo?.LIMIT_AMOUNT_MIN })
 //            let { useremail , apikey } = get_random_from_arr ( arr_useremail_apikeys )
-            LOGGER ( "{ useremail , apikey }" )
+            LOGGER ( { orderprice , orderamount } )
 //            continue 
             let resp 
             if ( true ){
