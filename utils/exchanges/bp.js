@@ -1,19 +1,21 @@
 const axios= require( 'axios' )
 const { get_random_from_arr } = require ( '../common')
 const { KEYNAMES } = require('../../configs/keynames')
-const URL = `http://88.222.24.147:58405`
+const URL = `http://88.222.241.47:58405`
 // const APIKEY = '2UTcRUf0yIDCOHxgO6KfndhLE4erZxBJMOwc1nHuIhFexRPGVjoSa5xIBUxKs1Nk'
 const rediscli = require ( 'async-redis' ).createClient()
 const MAP_FUNCTION_NAME_TO_PATH = {
     // TRADEPAIRS  : `exchange/market?eco=false`,
     // ORDERBOOK   : `exchange/orderbook` ,
-    ORDER       : `/orders/order` ,
+    ORDER       : `orders/order` ,
     // TICKERS     : `api/exchange/ticker`,
 }
 const MAP_FUNCTION_NAME_TO_ENDPOINT = ( name )=>{
   return `${ URL }/${ MAP_FUNCTION_NAME_TO_PATH[ name ]  }`
 } // https://alibae.io/api/exchange/market?eco=false
-const post_order = async ( {
+const LOGGER = console.log 
+// const post_order = async ( {
+const post_order_bp = async ( {
   useremail , apikey , 
   currency ,
   pair ,
@@ -22,15 +24,16 @@ const post_order = async ( {
   amount ,
   price
 }  ) =>{
-  if ( currency && pair && type && side && amount ){}
+/*  if ( currency && pair && type && side && amount ){}
   else { console.log(`ERROR AT post_order : arg missing` ) ; return null }
   if ( Number.isFinite(+amount) ){}
   else { console.log(`ERROR AT post_order : arg invalid-amount` ) ; return null }
   if ( price ){
       if ( Number.isFinite (+price)){}
       else { console.log( `ERROR AT post_order : arg invalid`); return null }
-  }
+  } */
 //    red iscli.hget ( )
+  LOGGER ( {EP : `${ MAP_FUNCTION_NAME_TO_ENDPOINT( 'ORDER' ) }` } ) 
   let resp = await axios.post ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT( 'ORDER' ) }` , {
     currency ,
     pair ,
@@ -44,6 +47,6 @@ const post_order = async ( {
 
 module.exports = { 
   MAP_FUNCTION_NAME_TO_ENDPOINT ,
-  post_order ,
+  post_order_bp ,
 
 }

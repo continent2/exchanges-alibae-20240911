@@ -12,7 +12,8 @@ const { getRandomInt  , get_random_float } = require ( '../utils/math' )
 const { parse_orderbook } = require ( '../utils/exchanges/binance' )
 const rediscli = require( 'async-redis' ).createClient()  // 
 const { post_order : post_order_prod , post_order_with_random_pick_bot } = require ( '../utils/exchanges/alibae' )
-const { post_order : post_order_bp } = require ( '../utils/exchanges/bp')
+const {  post_order_bp } = require ( '../utils/exchanges/bp')
+// const { post_order : post_order_bp } = require ( '../utils/exchanges/bp')
 const { get_random_from_arr, conv_array_to_object } = require ( '../utils/common' )
 const { findall } = require('../utils/db')
 let list_tradepair = [ 'BTC_USDT' ]
@@ -97,7 +98,8 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
         console.log ( { midprice , buy_volume , sell_volume , stepsize , N_ORDER_BINS_A_SIDE } )
         // let stepsize = +midprice / N_ORDE R_BINS_A_SIDE
         /** SELL SIDE */
-        for ( let idxbin = 0 ; idxbin < N_ORDER_BINS_A_SIDE ; idxbin ++ ) { LOGGER ( { idxbin })
+        for ( let idxbin = 0 ; idxbin < N_ORDER_BINS_A_SIDE ; idxbin ++ ) { 
+          LOGGER ( { idxbin , N_ORDER_BINS_A_SIDE })
           let bin_border_low  = midprice + ( 1 + idxbin ) * stepsize
           let bin_border_high = midprice + ( 2 + idxbin ) * stepsize
           let bin_mid         = midprice + ( 1.5+idxbin ) * stepsize //          LOGGER( { bin_border_low , bin_border_high , bin_mid })   //        continue
@@ -112,7 +114,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
             LOGGER ( { orderprice , orderamount } )
 //            continue 
             let resp 
-            if ( true ){
+            if ( true ){ LOGGER ( `dbg point`)
               resp = await post_order_bp ({
                 currency ,
                 pair ,
@@ -135,7 +137,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
             }
           }
         }
-        continue
+//        continue
 //        process.exit ( 1 )
         /** BUY SIDE */
         for ( let idxbin = 0 ; idxbin < N_ORDER_BINS_A_SIDE ; idxbin ++ ) {
@@ -168,7 +170,8 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
   }
 }
 // main ( { MAX_STOP_SYMBOL_ITER_AT : 10 } )
-main ( { MAX_STOP_SYMBOL_ITER_AT : 1  } )
+main ( { MAX_STOP_SYMBOL_ITER_AT : 5  } )
+// main ( { MAX_STOP_SYMBOL_ITER_AT : 1  } )
 module.exports = {
   main ,
   get_user_apikeys_from_db
