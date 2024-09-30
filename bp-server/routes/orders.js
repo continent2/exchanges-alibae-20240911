@@ -31,7 +31,7 @@ router.post('/order', async (req, res, next) => {
     createdAt : timenow ,
     updatedAt : timenow ,
     status : 'OPEN' ,
-    timeInForace : 'GTC' ,
+    timeInForce : 'GTC' ,
     filled : 0 ,
     remaining : amount ,
     cost : 0 ,
