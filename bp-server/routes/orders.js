@@ -22,6 +22,7 @@ router.post('/order', async (req, res, next) => {
     amount ,
     price  ,
     id : uuid() ,
+    userId : 'b1c6cc9b-42c9-40ec-8606-f1329e57e358' ,
     createdAt : timenow ,
     updatedAt : timenow ,
     status : 'OPEN' ,
