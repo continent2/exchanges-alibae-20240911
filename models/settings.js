@@ -40,6 +40,10 @@ module.exports = function(sequelize, DataTypes) {
     group: {
       type: DataTypes.STRING(50),
       allowNull: true
+    },
+    subvalue: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     sequelize,

@@ -19,7 +19,6 @@ const KEYNAMES = {
       START : 'START' ,
     }
     // MESSAGE_TYPE_CH ARGER : 'SIGNAL_CHA RGER' ,
-
   }
 }
 module.exports ={

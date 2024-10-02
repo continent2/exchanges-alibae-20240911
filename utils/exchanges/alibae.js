@@ -8,19 +8,19 @@ const MAP_FUNCTION_NAME_TO_PATH = {
     TRADEPAIRS  : `exchange/market?eco=false`,
     ORDERBOOK   : `exchange/orderbook` ,
     ORDER       : `exchange/order` ,
-    TICKERS     : `api/exchange/ticker`,
+    TICKERS     : `exchange/ticker`,
 }
 const MAP_FUNCTION_NAME_TO_ENDPOINT = ( name )=>{
     return `${ URL }/${ MAP_FUNCTION_NAME_TO_PATH[ name ]  }`
 } // https://alibae.io/api/exchange/market?eco=false
 const normalize_ticker_symbol = str=> { return str.replace ( /\//g , '_' ) }
 const get_tickers = async ()=>{
-  let resp = await axios.get ( this.MAP_FUNCTION_NAME_TO_ENDPOINT( 'TICKERS') ) 
+  let resp = await axios.get ( MAP_FUNCTION_NAME_TO_ENDPOINT( 'TICKERS') ) 
   let jtickers = {}
-  let arr_tickersymbols = Object.keys ( jtickers )
+  let arr_tickersymbols = Object.keys ( resp?.data ) //  jtickers
   for ( let idx = 0 ; idx< arr_tickersymbols?.length ; idx++ ){
     let tickersymbol = arr_tickersymbols[ idx ]
-    jtickers [ normalize_ticker_symbol ( tickersymbol ) ] = + resp[ tickersymbol ].last
+    jtickers [ normalize_ticker_symbol ( tickersymbol ) ] = + resp?.data [ tickersymbol ].last
   }
   return jtickers
 } // "ZRO/USDC": {   "last": 4.062,

@@ -55,7 +55,7 @@ const fetch_ticker_symbols = async ()=>{
       j_ticker_symbols [ SELECT_TEST_PAIR ]  = resp
     }
     break
-    default :   j_ticker_symbols= await rediscli.hgetall ( 'TRADEPAIRS' )
+    default :   j_ticker_symbols = await rediscli.hgetall ( 'TRADEPAIRS' )
     break
   }  
   return j_ticker_symbols
@@ -80,7 +80,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
   let arr_ticker_symbols = Object.keys ( j_ticker_symbols )
   if( false ) {  list_tradepair = arr_ticker_symbols }
   else {    list_tradepair = [ 'BTC_USDT' ] }
-  let max_iter_symbols 
+  let max_iter_symbols
   if ( MAX_STOP_SYMBOL_ITER_AT ){ max_iter_symbols = MAX_STOP_SYMBOL_ITER_AT }
   else { max_iter_symbols = list_tradepair?.length }
   arr_useremail_apikeys = await get_user_apikeys_from_db ()
@@ -91,25 +91,25 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
     let marketinfo = JSON.parse ( j_ticker_symbols [ tickersymbol_snake ] )
     let ep = `${ BIN_EP_ORDERBOOK }` //    let ep = `${ BIN_EP_SPOT_TICKER }${ tickersymbol }`
     try {
-      let resp = await axios.get ( ep , { params : { limit : N_BINANCE_ORDERBOOK_QUERY_COUNT , symbol : tickersymbol }} )
-      if ( resp?.data?.asks?.length ){ //        let { price : midprice } = resp?.data
+      let resp = await axios.get ( ep , { params : { limit : N_BINANCE_ORDERBOOK_QUERY_COUNT , symbol : tickersymbol } } )
+      if ( resp?.data?.asks?.length ){ // let { price : midprice } = resp?.data
         let { midprice , buy_volume , sell_volume } = parse_orderbook ( { j_ob : resp?.data } )        
         let stepsize = +midprice / REF_PRICE_DIVIDER_FOR_BIN_WIDTH
         console.log ( { midprice , buy_volume , sell_volume , stepsize , N_ORDER_BINS_A_SIDE } )
         // let stepsize = +midprice / N_ORDE R_BINS_A_SIDE
         /** SELL SIDE */
         for ( let idxbin = 0 ; idxbin < N_ORDER_BINS_A_SIDE ; idxbin ++ ) { 
-          LOGGER ( { idxbin , N_ORDER_BINS_A_SIDE })
+          LOGGER ( { idxbin , N_ORDER_BINS_A_SIDE } )
           let bin_border_low  = midprice + ( 1 + idxbin ) * stepsize
           let bin_border_high = midprice + ( 2 + idxbin ) * stepsize
-          let bin_mid         = midprice + ( 1.5+idxbin ) * stepsize //          LOGGER( { bin_border_low , bin_border_high , bin_mid })   //        continue
+          let bin_mid         = midprice + ( 1.5+idxbin ) * stepsize // LOGGER( { bin_border_low , bin_border_high , bin_mid })   //        continue
           let n_orders = getRandomInt ( 1 , N_MAX_ORDERS_A_BIN )
           LOGGER ( { bin_border_low , bin_border_high , n_orders })
           for ( let idxorder = 0 ; idxorder < n_orders ; idxorder ++ ) {
             let orderprice = get_random_float ( { max : bin_border_high   , min : bin_border_low })
 //            let orderamount= get_random_float ( { max : MAX_ORDER_AMOUNT  , min : MIN_ORDER_AMOUNT })
             // let orderprice = get_random_float ( { max : marketinfo?.LIMIT_PRICE_MAX , min: marketinfo?.LIMIT_PRICE_MIN  })
-            let orderamount= get_random_float ( { max : marketinfo?.LIMIT_AMOUNT_MAX , min : marketinfo?.LIMIT_AMOUNT_MIN })
+            let orderamount = get_random_float ( { max : marketinfo?.LIMIT_AMOUNT_MAX , min : marketinfo?.LIMIT_AMOUNT_MIN })
 //            let { useremail , apikey } = get_random_from_arr ( arr_useremail_apikeys )
             LOGGER ( { orderprice , orderamount } )
 //            continue 

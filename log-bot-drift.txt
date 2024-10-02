@@ -1,0 +1,1 @@
+POST ORDER:{"currency":"BTC","pair":"USDT","type":"limit","side":"buy","amount":null,"price":null}
