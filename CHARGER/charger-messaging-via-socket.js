@@ -18,9 +18,11 @@ const moment = require('moment')
 const { URL_REDIS_CONN  } = require ( '../configs/redis' )
 const { KEYNAMES } = require('../configs/keynames')
 const redisclihash = asyncredis.createClient( ) // URL_REDIS_CONN?.LOCAL )
-const redisclimsg  = asyncredis.createClient( URL_REDIS_CONN?.DEFAULT )
+// const redisclimsg  = asyncredis.createClient( URL_REDIS_CONN?.DEFAULT )
 const { io } = require( 'socket.io-client' )
-
+const { SCHEDULER } = require( '../configs/scheduler' )
+const PARSER = JSON.parse 
+let socket
 let h_interval 
 let CHARGE_PERIOD_IN_SEC = 60
 let CHARGE_UPTO_TARGET_AMOUNT = 100_0000_0000
@@ -163,23 +165,36 @@ const chargeup = async () => {
   await form_tp_datas ( { listtp_raw } )
 //  for ( let idxbot = 0 ; idxbot < arr_bot_emails?.length ; idxbot ++ ) {   }
 }
-const create_common_channel_subscriber = async (  )=>{
-  let resp = await redisclimsg.subscribe ( KEYNAMES?.REDIS?.CHANNEL_NAME_COMMON , strmessage => { 
-    LOGGER ( { strmessage } )
-    let message = JSON.parse ( strmessage )
-    if ( message && message?.receiver == KEYNAMES?.REDIS?.RECEIVERS?.CHARGER ){
-      if ( message.action ){ 
-        switch ( message.action ){
-          case KEYNAMES?.REDIS?.ACTIONS?.RESTART : 
-          case KEYNAMES?.REDIS?.ACTIONS?.START :
-            main ()
-          break
-          default :           break
-        }
+// const create_common_channel_subscriber = async (  )=>{
+//   let resp = await redisclimsg.subscribe ( KEYNAMES?.REDIS?.CHANNEL_NAME_COMMON , strmessage => { 
+//     LOGGER ( { strmessage } )
+//     let message = JSON.parse ( strmessage )
+//     if ( message && message?.receiver == KEYNAMES?.REDIS?.RECEIVERS?.CHARGER ){
+//       if ( message.action ){ 
+//         switch ( message.action ){
+//           case KEYNAMES?.REDIS?.ACTIONS?.RESTART : 
+//           case KEYNAMES?.REDIS?.ACTIONS?.START :
+//             main ()
+//           break
+//           default :           break
+//         }
+//       }
+//     } else {}
+//   })
+//   return resp
+// }
+const create_common_channel_socket = async ()=>{
+  socket = io( SCHEDULER?.URL_SOCKET_COMPLETE )
+  socket.on ( SCHEDULER?.MSG_ACTION_ON_WORKER , data =>{
+    let { actiontype , workertype } = PARSER ( data )
+    if ( workertype ){
+      switch ( workertype){
+        case 'CHARGER' :  
+        break
+        default : break 
       }
-    } else {}
+    } else { ; }
   })
-  return resp
 }
 const init = async ()=>{
   let respsettings = await findall ( 'settings' , { group : 'CHARGE' , active : 1 } )
@@ -190,7 +205,8 @@ const init = async ()=>{
   else {}
   if (jsettings[ 'CHARGE_INITIAL_DELAY_IN_SEC' ] && Number.isFinite ( +jsettings[ 'CHARGE_INITIAL_DELAY_IN_SEC' ] ) ){ CHARGE_INITIAL_DELAY_IN_SEC = +jsettings['CHARGE_INITIAL_DELAY_IN_SEC'] }
   else {}
-  await create_common_channel_subscriber ()
+  await create_common_channel_socket()
+//  await create_common_channel_subscriber ()
 }
 const main = async () => {
   await init () //  process.exit ( 1 )

@@ -1,6 +1,38 @@
 
 // const BIN_EP_ORDERBOOK = `https://api.binance.com/api/v3/depth?limit=10&symbol=`
 // https://api.binance.com/api/v3/depth?limit=10&symbol=BTCUSDT
+const axios = require ( 'axios' )
+const rediscli=require( 'async-redis' ).createClient()
+const moment = require ( 'moment' )
+const URL = `https://api.binance.com/api/v3`
+const MAP_FUNCTION_NAME_TO_PATH = {
+  VOLUME_AND_TICKER : `ticker/24hr`
+}
+const { KEYNAMES }  = require ('../../configs/keynames' ) 
+const KEYNAME_REF_VOLUME = KEYNAMES?.REDIS?.REF_VOLUME
+const STRINGER = JSON.stringify
+const MAP_FUNCTION_NAME_TO_ENDPOINT = ( name )=>{
+  return `${ URL }/${ MAP_FUNCTION_NAME_TO_PATH[ name]}`
+}
+const get_volume_and_ticker = async ( { isreturnvalue } )=>{
+  let resp = await axios.get ( MAP_FUNCTION_NAME_TO_ENDPOINT ( 'VOLUME_AND_TICKER' ) )
+  let {status} = resp ; status = +status
+  if ( Number.isFinite( status ) && status >= 200 && status < 400 ){ 
+    let timestamp = moment().unix()
+    for ( let dataitem of resp?.data ){
+      let { symbol , lastPrice , volume , quoteVolume } = dataitem
+      await rediscli.hset ( KEYNAME_REF_VOLUME , symbol , STRINGER( {
+        price : lastPrice , 
+        volumeinbase : volume ,
+        volumeinquote: quoteVolume ,
+        timestamp
+      } ) )
+    }
+    if ( isreturnvalue ) { return resp?.data }
+    else {}
+  }
+  else { return null }
+}
 const sumreduce = (a,b)=>{
   if ( Number.isFinite(a) && Number.isFinite(b) ){ return (a + b) }
   else if ( Number.isFinite(b) ){ return (b) }
@@ -35,7 +67,10 @@ const parse_orderbook = ({ j_ob })=>{
   total_volume: 8.28942
 } */
 let j_spot_ticker_resp = { symbol: 'BTCUSDT', price: '57727.99000000' }
-module.exports= { parse_orderbook , get_mean_order_amount_from_orderbook } //  j_ob_ex ,
+module.exports= { 
+  get_volume_and_ticker ,
+  parse_orderbook , 
+  get_mean_order_amount_from_orderbook } //  j_ob_ex ,
 
 let j_ob_ex = {
   "lastUpdateId": 51764995056,

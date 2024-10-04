@@ -8,7 +8,7 @@ const MAP_FUNCTION_NAME_TO_PATH = {
     TRADEPAIRS  : `exchange/market?eco=false`,
     ORDERBOOK   : `exchange/orderbook` ,
     ORDER       : `exchange/order` ,
-    TICKERS     : `exchange/ticker`,
+    TICKERS     : `exchange/ticker`,    
 }
 const MAP_FUNCTION_NAME_TO_ENDPOINT = ( name )=>{
     return `${ URL }/${ MAP_FUNCTION_NAME_TO_PATH[ name ]  }`
