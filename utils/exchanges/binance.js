@@ -11,10 +11,11 @@ const MAP_FUNCTION_NAME_TO_PATH = {
 const { KEYNAMES }  = require ('../../configs/keynames' ) 
 const KEYNAME_REF_VOLUME = KEYNAMES?.REDIS?.REF_VOLUME
 const STRINGER = JSON.stringify
-const MAP_FUNCTION_NAME_TO_ENDPOINT = ( name )=>{
-  return `${ URL }/${ MAP_FUNCTION_NAME_TO_PATH[ name]}`
+const MAP_FUNCTION_NAME_TO_ENDPOINT = ( name )=>{  return `${ URL }/${ MAP_FUNCTION_NAME_TO_PATH[ name] }`
 }
-const get_volume_and_ticker = async ( { isreturnvalue } )=>{
+const db = require ( '../../models' )
+
+const get_ref_volume_and_ticker = async ( { isreturnvalue } )=>{
   let resp = await axios.get ( MAP_FUNCTION_NAME_TO_ENDPOINT ( 'VOLUME_AND_TICKER' ) )
   let {status} = resp ; status = +status
   if ( Number.isFinite( status ) && status >= 200 && status < 400 ){ 
@@ -27,6 +28,13 @@ const get_volume_and_ticker = async ( { isreturnvalue } )=>{
         volumeinquote: quoteVolume ,
         timestamp
       } ) )
+      await db['tradevolumes'].create  ( {
+        symbolref : symbol , // : '',
+        price : lastPrice  ,
+        volumeinbase : volume ,
+        volumeinquote : quoteVolume ,
+        timestamp
+      })
     }
     if ( isreturnvalue ) { return resp?.data }
     else {}
@@ -68,7 +76,7 @@ const parse_orderbook = ({ j_ob })=>{
 } */
 let j_spot_ticker_resp = { symbol: 'BTCUSDT', price: '57727.99000000' }
 module.exports= { 
-  get_volume_and_ticker ,
+  get_ref_volume_and_ticker ,
   parse_orderbook , 
   get_mean_order_amount_from_orderbook } //  j_ob_ex ,
 

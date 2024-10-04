@@ -4,7 +4,7 @@ const { URL_REDIS_CONN  } = require ( '../configs/redis' )
 const { KEYNAMES } = require('../configs/keynames')
 const rediscli = asyncredis.createClient ( URL_REDIS_CONN?.LOCAL ) 
 const { spawn } = require ( 'child_process' )
-const { get_volume_and_ticker } =require( '../utils/exchanges/binance' )
+const { get_ref_volume_and_ticker } =require( '../utils/exchanges/binance' )
 const PATH_COMMON = `/home/cheny/works/ex-bot-20240911`
 const TIME_CLEARANCES_IN_SEC = { 
   TO_CHARGER : 6.5 ,
@@ -38,10 +38,10 @@ const main = async () => {
     ( TIME_CLEARANCES_IN_SEC?.TO_CHARGER + TIME_CLEARANCES_IN_SEC?.TO_MARKETMAKER + 
       TIME_CLEARANCES_IN_SEC?.TO_SYNCER
     ) * 1000 
-  )
-  await get_volume_and_ticker( )
+  )  
+  await get_ref_volume_and_ticker( )
   let h = setInterval ( async()=>{
-    await get_volume_and_ticker( )
+    await get_ref_volume_and_ticker( )
   } , PERIOD_FETCH_BINANCE_VOLUME_IN_SEC * 1000 )
 }
 main ()

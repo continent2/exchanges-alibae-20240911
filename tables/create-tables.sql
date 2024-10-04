@@ -3,6 +3,20 @@ create user 'exbot'@localhost identified by 'Kw9bMWHt4Z' ;
 grant all privileges on exbot.* to 'exbot'@localhost ;
 flush privileges ;
 
+CREATE TABLE `tradevolumes` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `createdat` datetime DEFAULT current_timestamp(),
+  `updatedat` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  symbol varchar(30) ,
+  price varchar(30) ,
+  volumeinquote varchar(30) ,
+  volumeinbase varchar(30) ,
+  refex varchar(20) comment 'default null=>binance, designate in this field if any other', 
+  `timestamp` bigint unsigned ,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `symbol` (`symbol`, `timestamp` )
+) ;
+
 CREATE TABLE `settings` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `createdat` datetime DEFAULT current_timestamp(),

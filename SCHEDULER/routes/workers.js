@@ -11,10 +11,10 @@ router.get ( '/status' , async (req,res)=>{
 })
 const MAP_ACTIONTYPE= { START : 'START', start: 'START' , STOP : 'STOP', stop : 'STOP' }
 const MAP_WORKERTYPE ={ 
-  CHARGER : 'CHARGER' , 
+  CHARGER :     'CHARGER' , 
   MARKETMAKER : 'MARKETMAKER' ,
-  SYNCER : 'SYNCER' ,
-  DRIFTER : 'DRIFTER' ,
+  SYNCER :      'SYNCER' ,
+  DRIFTER :     'DRIFTER' ,
 }
 const syncedtimeout = ( { delay_in_sec }) => new Promise(resolve => {
   setTimeout(() => { //    console.log("2nd");
@@ -35,7 +35,7 @@ const coordinate_worker_starting = async ()=>{
   await syncedtimeout ( {delay_in_sec : 5 } )
 }
 
-router.pose ( '/action/:actiontype' , async (req,res)=>{
+router.post ( '/action/:actiontype' , async (req,res)=>{
   let { actiontype , }=req?.params
   if ( MAP_ACTIONTYPE[ actiontype] ){}
   else { resperr( res, messages?.MSG_ARGINVALID ) ; return }

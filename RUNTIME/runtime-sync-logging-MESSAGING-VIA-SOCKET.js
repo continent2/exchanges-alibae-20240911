@@ -34,7 +34,7 @@ const create_common_channel_socket = async ()=>{
         case 'SYNCER' : 
           switch ( actiontype ){
             case 'START' :
-              poisson_process_for_sync.start() // define_poissong_process ()
+              poisson_process_for_sync.start() // define_poisson_process ()
             break 
             case 'STOP' : // { if ( h_interval){ clearInterval ( h_interval ) ; }              }
               poisson_process_for_sync.stop()
@@ -169,7 +169,7 @@ const sweep_up_counter_orders = async ( { tickersymbol , localprice , targetpric
 }
 const fs=require('fs')
 let fstream = fs.createWriteStream( "log-bot-sync.txt", {flags:'a'} )
-const define_poissong_process = async ()=>{
+const define_poisson_process = async ()=>{
   fstream = fs.createWriteStream( "log-bot-sync.txt", {flags:'a'} )
   let respsettings = await db[ 'settings'].findAll ( { raw: true , where : { group: 'SYNC' , active : 1 } } )
   let jsettings = conv_array_to_object ( { arr : respsettings, keyfieldname : 'key', valuefieldname : 'value' })
@@ -234,7 +234,7 @@ const define_poissong_process = async ()=>{
 }
 
 const init = async()=>{
-  await define_poissong_process ()
+  await define_poisson_process ()
   await create_common_channel_socket ()
 }
 init()
@@ -252,5 +252,5 @@ init()
 } */
 
 module.exports = {
-  define_poissong_process
+  define_poisson_process
 }

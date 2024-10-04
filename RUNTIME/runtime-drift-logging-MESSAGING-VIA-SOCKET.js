@@ -20,7 +20,8 @@ const { KEYNAMES } = require( '../configs/keynames' )
 const { get_tickers, get_orderbook, post_order, post_order_with_random_pick_bot } = require ( '../utils/exchanges/alibae' )
 const { conv_array_to_object } = require('../utils/common')
 const db=require( '../models' )
-const LOGGER = console.log
+const LOGGER = console.log 
+const PARSER = JSON.parse
 const moment = require( 'moment' )
 // let list_tradepair = [ 'BTC_USDT' ]
 let AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC = 5 // DEV 
@@ -43,7 +44,7 @@ const create_common_channel_socket = async ()=>{
         case 'DRIFTER' : 
           switch ( actiontype ){
             case 'START' :
-              poisson_process_for_drift.start() // define_poissong_process ()
+              poisson_process_for_drift.start() // define_poisson_process ()
             break 
             case 'STOP' : // { if ( h_interval){ clearInterval ( h_interval ) ; }              }
               poisson_process_for_drift.stop()
@@ -76,8 +77,25 @@ const decide_buy_sell_random = ()=>{
 }
 // AMOUNT @SELL SIDE => SHORT BASE
 // AMOUNT @BUY  SIDE => SHORT QUOTE
-const decide_amount_random = async ( { tickersymbol } )=>{
+const decide_amount_random = async ( { tickersymbol , side , AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC } )=>{
+  let mean_amount = +ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK ; let vol24h
+  let tickersymbol_ref = tickersymbol.replace ( /_/g , '' )
+  let resp = await rediscli.hget ( KEYNAMES?.REDIS?.REF_VOLUME , tickersymbol_ref )
+  if ( resp ) {   
+    let jdata = PARSER( resp )
+    switch ( side ) {
+      case 'buy' : vol24h = +jdata?.volumeinquote ; break
+      case 'sell': vol24h = +jdata?.volumeinbase  ; break
+    }
+    mean_amount = vol24h * AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC / 24 / 3600
+  }
+  else { }
+  let amount  = gaussian ( { mean : mean_amount , stdev : ORDER_PRICE_DIST_STDEV * mean_amount } )
+  return Math.abs( amount ) 
+}
+const decide_amount_random_naive = async ( { tickersymbol } )=>{
   let mean_amount = +ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK
+//  let tickersymbol_ref = tickersymbol.replace ( /_/g , '' )
   let resp = await rediscli.hget ( KEYNAMES?.REDIS?.REF_MEAN_ORDER_AMOUNT , tickersymbol )
   if ( resp ) {     mean_amount = +resp  }
   else { }
@@ -136,9 +154,9 @@ const define_poisson_process = async ()=>{
       pair = quote
       type = decide_limit_market_random()
       side = decide_buy_sell_random ()
-      amountinbase = await decide_amount_random ( { tickersymbol } ) // THE BINANCE WAY
+      amountinbase = await decide_amount_random ( { tickersymbol , side , AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC } ) // THE BINANCE WAY
       LOGGER ( { amountinbase })
-      let price = decide_price_random ( { 
+      let price = decide_price_random ( {
         pricemean : refprice ,
         pricestdevnorm: +ORDER_PRICE_DIST_STDEV * +refprice, 
 //        pricestdevnorm: +ORDER_PRICE_DIST_STDEV , // / +refprice, 
