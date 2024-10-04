@@ -8,7 +8,7 @@ CHARGE , NOP
 let MODE_DEV_PROD = 'DEV' // 'PROD'
 const axios = require( 'axios' )
 const db = require ( '../models' )
-const dbalibae =require('../models-alibae')
+const dbalibae =require( '../models-alibae' )
 const { conv_array_to_object , uuid }= require( '../utils/common')
 const { findall  , upsert } = require ('../utils/db')
 const { get_trade_pairs } = require( '../utils/exchanges/alibae')
@@ -20,9 +20,7 @@ const { KEYNAMES } = require('../configs/keynames')
 const redisclihash = asyncredis.createClient( ) // URL_REDIS_CONN?.LOCAL )
 // const redisclimsg  = asyncredis.createClient( URL_REDIS_CONN?.DEFAULT )
 const { io } = require( 'socket.io-client' )
-const { SCHEDULER } = require( '../configs/scheduler' )
 const PARSER = JSON.parse 
-let socket
 let h_interval 
 let CHARGE_PERIOD_IN_SEC = 60
 let CHARGE_UPTO_TARGET_AMOUNT = 100_0000_0000
@@ -32,7 +30,29 @@ const N_COUNT_BOTS =  1
 let arr_bot_names = [... Array( N_COUNT_BOTS ).keys()].map( el => 'BOT'+(''+el).padStart(3, '0' ) )
 let arr_bot_emails= arr_bot_names.map ( el => `${ el }@gmail.com` )
 let arr_bot_ids = arr_bot_emails
-
+const { SCHEDULER } = require( '../configs/scheduler' )
+let socket
+const create_common_channel_socket = async ()=>{
+  socket = io( SCHEDULER?.URL_SOCKET_COMPLETE )
+  socket.on ( SCHEDULER?.MSG_ACTION_ON_WORKER , data =>{
+    let { actiontype , workertype } = PARSER ( data )
+    if ( workertype ){ ;   } 
+    else { return }
+      switch ( workertype ){
+        case 'CHARGER' : 
+          switch ( actiontype ){
+            case 'START' :
+              main ()
+            break 
+            case 'STOP' : { if ( h_interval){ clearInterval ( h_interval ) ; }
+              }
+            break
+          }
+        break
+        default : break 
+      }
+  })
+}
 function generateApiKey(length = 64) {  const characters =    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let apiKey = "";
   for (let i = 0; i < length; i++) {    apiKey += characters.charAt(Math.floor(Math.random() * characters.length));
@@ -43,34 +63,38 @@ const ensure_exists_or_create_users = async () => {
   for ( let idxbot = 0 ; idxbot< arr_bot_emails?.length ; idxbot ++ ){
     let email = arr_bot_emails [ idxbot ]
     let respuser = await dbalibae[ 'user' ].findOne( {raw: true, where : { email } })
-    let timenow = dbalibae.sequelize.fn( 'NOW' )
+    let timenow = dbalibae.sequelize.fn( 'NOW' )    
     if ( respuser ){ }
-    else {
+    else { //      let transaction = await db.sequelize.transaction( )
       respuser = await dbalibae[ 'user' ].create ({ 
         id : uuid() ,
         email  ,
         roleId : 4,
         status : 'ACTIVE' ,
         createdAt : timenow ,
-        updatedAt : timenow
-      })
+        updatedAt : timenow ,        
+      } // , { transaction } 
+      ) //      await transaction.commit()
     }
     let respapikey = await dbalibae[ 'api_key' ].findOne ( { raw: true , where : { userId :respuser?.id  } } )
     if ( respapikey ){ }
-    else {  respapikey = await dbalibae[ 'api_key' ].create ( {
-      id : respuser?.id ,
-      userId: respuser?.id,
-      name: generateApiKey ( 10 ),
-      key: generateApiKey( 64 ), 
-      permissions: '[\"trade\",\"deposit\",\"transfer\",\"futures\",\"withdraw\"]' ,
-      ipWhitelist:  '[]',
-      createdAt : timenow ,
-      updatedAt : timenow ,
-    })}
+    else {  //      let transaction = await db.sequelize.transaction( )
+      respapikey = await dbalibae[ 'api_key' ].create ( {
+        id : respuser?.id ,
+        userId: respuser?.id,
+        name: generateApiKey ( 10 ),
+        key: generateApiKey( 64 ), 
+        permissions: '[\"trade\",\"deposit\",\"transfer\",\"futures\",\"withdraw\"]' ,
+        ipWhitelist:  '[]',
+        createdAt : timenow ,
+        updatedAt : timenow ,
+      } // , { transaction } 
+      ) //      await transaction.commit()
+    }
     await redisclihash.hset ( KEYNAMES?.REDIS?.APIKEY , arr_bot_emails[ idxbot ] , respapikey?.key )
   }
 }
-// const newKey = await models.apiKey.create({
+// const newKey = await models.apiKey.cre ate({
 //   userId: user.id,
 //   name: name,
 //   key: generateApiKey(), // Use the custom API key generator
@@ -183,20 +207,7 @@ const chargeup = async () => {
 //   })
 //   return resp
 // }
-const create_common_channel_socket = async ()=>{
-  socket = io( SCHEDULER?.URL_SOCKET_COMPLETE )
-  socket.on ( SCHEDULER?.MSG_ACTION_ON_WORKER , data =>{
-    let { actiontype , workertype } = PARSER ( data )
-    if ( workertype ){
-      switch ( workertype){
-        case 'CHARGER' :  
-        break
-        default : break 
-      }
-    } else { ; }
-  })
-}
-const init = async ()=>{
+const init_settings = async ()=>{
   let respsettings = await findall ( 'settings' , { group : 'CHARGE' , active : 1 } )
   let jsettings = conv_array_to_object ( {arr: respsettings , keyfieldname : 'key' , valuefieldname:'value'})
   if (jsettings[ 'CHARGE_PERIOD_IN_SEC' ] && Number.isFinite( +jsettings[ 'CHARGE_PERIOD_IN_SEC' ] ) ){ CHARGE_PERIOD_IN_SEC = +jsettings['CHARGE_PERIOD_IN_SEC'] } // 
@@ -205,11 +216,11 @@ const init = async ()=>{
   else {}
   if (jsettings[ 'CHARGE_INITIAL_DELAY_IN_SEC' ] && Number.isFinite ( +jsettings[ 'CHARGE_INITIAL_DELAY_IN_SEC' ] ) ){ CHARGE_INITIAL_DELAY_IN_SEC = +jsettings['CHARGE_INITIAL_DELAY_IN_SEC'] }
   else {}
-  await create_common_channel_socket()
+//  await create_common_channel_socket()
 //  await create_common_channel_subscriber ()
 }
 const main = async () => {
-  await init () //  process.exit ( 1 )
+  await init_settings () //  process.exit ( 1 )
   await ensure_exists_or_create_users ( ) //  process.exit ( 1 )
   let h_timeout = setTimeout ( async ()=>{
     await chargeup ( )
@@ -220,7 +231,8 @@ const main = async () => {
     await chargeup ()
   } , CHARGE_PERIOD_IN_SEC * 1000 )
 }
-main ()
+false && main ()
+true && create_common_channel_socket()
 module.exports = {
   main
 }

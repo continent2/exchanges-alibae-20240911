@@ -16,6 +16,42 @@ const MAP_WORKERTYPE ={
   SYNCER : 'SYNCER' ,
   DRIFTER : 'DRIFTER' ,
 }
+const syncedtimeout = ( { delay_in_sec }) => new Promise(resolve => {
+  setTimeout(() => { //    console.log("2nd");
+    resolve();
+  }, 1000 * +delay_in_sec )
+})
+
+const ARR_WORKERS = [ 'CHARGER' , 'MARKETMAKER' , 'SYNCER' , 'DRIFTER' ]
+const coordinate_worker_starting = async ()=>{
+  let actiontype = 'START'
+  msgsender.request ( 'MSG_ACTION_ON_WORKER', { actiontype , workertype: ARR_WORKERS [ 0 ] } , ()=>{} )
+  await syncedtimeout ( {delay_in_sec : 5 } )
+  msgsender.request ( 'MSG_ACTION_ON_WORKER', { actiontype , workertype: ARR_WORKERS [ 1 ] } , ()=>{} )
+  await syncedtimeout ( {delay_in_sec : 5 } )
+  msgsender.request ( 'MSG_ACTION_ON_WORKER', { actiontype , workertype: ARR_WORKERS [ 2 ] } , ()=>{} )
+  await syncedtimeout ( {delay_in_sec : 5 } )
+  msgsender.request ( 'MSG_ACTION_ON_WORKER', { actiontype , workertype: ARR_WORKERS [ 3 ] } , ()=>{} )
+  await syncedtimeout ( {delay_in_sec : 5 } )
+}
+
+router.pose ( '/action/:actiontype' , async (req,res)=>{
+  let { actiontype , }=req?.params
+  if ( MAP_ACTIONTYPE[ actiontype] ){}
+  else { resperr( res, messages?.MSG_ARGINVALID ) ; return }
+  actiontype = MAP_ACTIONTYPE [ actiontype ]
+  switch ( actiontype ){
+    case 'START' : await coordinate_worker_starting()
+    break
+    case 'STOP' :{
+      for ( let workertype of ARR_WORKERS ){
+        msgsender.request ( 'MSG_ACTION_ON_WORKER', { actiontype , workertype } , ()=>{} )
+      }
+    }            
+    break
+  }
+  respok ( res, 'INITIATED')
+})
 router.post ( '/action/:actiontype/:workertype' , async (req,res)=>{
   let { actiontype , workertype }=req?.params
   if ( MAP_ACTIONTYPE[ actiontype] ){}

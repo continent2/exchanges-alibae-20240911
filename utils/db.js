@@ -4,10 +4,19 @@ const findall = async (table, jfilter) => {
   return await db[table].findAll({ raw: true, where: jfilter });
 }
 const findone=async(table,jfilter)=>          { return await db[table].findOne({raw:true,where:jfilter})}
-const upsert = async ( { db , table , values, condition } ) => {
+const upsert = async ( { db , table , values, condition } ) => {  
   let obj = await db [ table ].findOne({ where: condition })
-  if ( obj ){ return obj.update(values) }
-  else { return db [ table ].create( { ... values , ... condition , id : uuid() } ) }
+  let transaction = await db.sequelize.transaction( )
+  if ( obj ){ 
+    let resp = await obj.update( values , { transaction }) 
+    await transaction.commit()
+    return resp
+  }
+  else { 
+    let resp = await db [ table ].create( { ... values , ... condition , id : uuid() } , { transaction }  )
+    await transaction.commit()
+    return resp
+  }
 }
 const moverow=async(fromtable, jfilter, totable , auxdata)=>{
 	findone( fromtable, jfilter).then(async resp=>{
