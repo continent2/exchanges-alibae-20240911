@@ -10,13 +10,14 @@ const axios = require( 'axios' )
 const db = require ( '../models' )
 const dbalibae =require( '../models-alibae' )
 const { conv_array_to_object , uuid }= require( '../utils/common')
-const { findall  , upsert, findone } = require ('../utils/db')
+const { findall  , upsert, findone, updaterows } = require ('../utils/db')
 const { get_trade_pairs } = require( '../utils/exchanges/alibae')
 const LOGGER = console.log 
 const asyncredis = require("async-redis")
 const moment = require('moment')
 const { URL_REDIS_CONN  } = require ( '../configs/redis' )
 const { KEYNAMES } = require('../configs/keynames')
+const { MAP_WORKERTYPE } = require ( '../configs/common' )
 const redisclihash = asyncredis.createClient( ) // URL_REDIS_CONN?.LOCAL )
 // const redisclimsg  = asyncredis.createClient( URL_REDIS_CONN?.DEFAULT )
 const { io } = require( 'socket.io-client' )
@@ -183,10 +184,12 @@ const chargeup = async () => {
   await set_redis_assets_unique ( { j_assets_unique } )
   /** CHARGE UP */
 //  process.exit ( 1 )
-  await chargeup_user_wallets_by_assets ( { j_assets_unique , arr_bot_ids })  
+  await chargeup_user_wallets_by_assets ( { j_assets_unique , arr_bot_ids })
+  let timestamp = moment().unix()
+  await updaterows ( 'workers' , { name: MAP_WORKERTYPE[ 'CHARGER' ] } , { lastacttimestamp : timestamp } )
   /**  TRADING PAIRS */
   // LOGGER ( { listtp_raw  } )
-  await form_tp_datas ( { listtp_raw } )
+  await form_tp_datas ( { listtp_raw } )  
 //  for ( let idxbot = 0 ; idxbot < arr_bot_emails?.length ; idxbot ++ ) {   }
 }
 // const create_common_channel_subscriber = async (  )=>{
@@ -236,7 +239,7 @@ true && create_common_channel_socket()
 module.exports = {
   main
 }
-const { MAP_WORKERTYPE } = require ( '../configs/common' )
+// const { MAP_WORKERTYPE } = require ( '../configs/common' )
 let h_interval_ping
 const init_ping= async()=>{
   let ALIVE_PING_PERIOD_IN_SEC = 60

@@ -1,5 +1,8 @@
 const db = require ( '../models' )
 const { uuid } = require ( './common')
+
+const updaterows = async(table,jfilter,jupdates)=>  { return await db[table].update(jupdates,{where:jfilter}) }
+
 const findall = async (table, jfilter) => {
   return await db[table].findAll({ raw: true, where: jfilter });
 }
@@ -49,8 +52,8 @@ const moverow=async(fromtable, jfilter, totable , auxdata)=>{
 }
 const createrow=async(table,jdata)=>{return await db[table].create(jdata)}
 
-
 module.exports ={ 
+  updaterows ,
   findall , 
   findone ,
   upsert ,

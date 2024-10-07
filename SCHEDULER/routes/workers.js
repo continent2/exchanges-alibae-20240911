@@ -10,7 +10,7 @@ const { getipaddress } = require('../../utils/session');
 const { upsert, upsert_sane, findall, findone } = require('../../utils/db')
 const moment = require ( 'moment' )
 const LOGGER  = console.log
-
+const { MAP_WORKERTYPE } = require ( '../../configs/common' )
 router.get ( '/statuses' , async ( req,res) =>{
   let respworkers = await findall( 'workers' , {} )
   let list = respworkers
@@ -22,32 +22,38 @@ router.get ( '/statuses' , async ( req,res) =>{
   }) 
   if ( Number.isFinite( +respsetting?.value )){ THRESHOLD_TELL_WORKER_ALIVE_OR_DEAD_IN_SEC = +respsetting?.value }
   else {} 
-  list = list.map ( el => { let lastping
-    if ( Number.isFinite( lastping = +el[ 'lastping'] ) ){      let timedelta = timenow - lastping
+  let map_workertype_handled = MAP_WORKERTYPE
+  list = list.map ( el => { let lastpingtimestamp
+    if ( Number.isFinite( lastpingtimestamp = +el[ 'lastpingtimestamp' ] ) ){      let timedelta = timenow - lastpingtimestamp
       if ( timedelta < THRESHOLD_TELL_WORKER_ALIVE_OR_DEAD_IN_SEC ){
               el['status'] = 'ALIVE'
       }
       else {  el['status'] = 'DEAD' }      
     }
     else { el['status'] = 'UNKNOWN' }
-    return el 
+    map_workertype_handled[ el?.name ] = true 
+    return el
   })
-  respok ( res, null , null , { list })
+  for ( let name of Object.keys ( map_workertype_handled )){
+    if ( map_workertype_handled[ name ]){}
+    else { list.push({ name , status : 'NOT-LAUNCHED'} )}
+  }
+  respok ( res, null , null , { list } )
 } ) 
 router.get ( '/status' , async (req,res)=>{
   respok ( res, 'SCHEULER-OK') ; return 
 })
 const MAP_ACTIONTYPE= { START : 'START', start: 'START' , STOP : 'STOP', stop : 'STOP' }
-const MAP_WORKERTYPE ={ 
+/* const MAP_WORKERTYPE ={ 
   CHARGER :     'CHARGER' , 
   MARKETMAKER : 'MARKETMAKER' ,
   SYNCER :      'SYNCER' ,
   DRIFTER :     'DRIFTER' ,
-}
+} */
 const ARR_WORKERS = [ 'CHARGER' , 'MARKETMAKER' , 'SYNCER' , 'DRIFTER' ]
 const syncedtimeout = ( { delay_in_sec }) => new Promise(resolve => {
   setTimeout(() => { //    console.log("2nd");
-    resolve();
+    resolve()
   }, 1000 * +delay_in_sec )
 })
 const coordinate_worker_starting = async ()=>{
@@ -73,7 +79,7 @@ router.post ( '/action/:actiontype' , async (req,res)=>{
       for ( let workertype of ARR_WORKERS ){
         msgsender.request ( 'MSG_ACTION_ON_WORKER', { actiontype , workertype } , ()=>{} )
       }
-    }            
+    }
     break
   }
   respok ( res, 'INITIATED')
@@ -108,12 +114,12 @@ router.post ( '/ping' , async (req,res) =>{
     db , // :'' , 
     table : 'workers' ,
     values : { 
-      lastping : timestamp ,
-      lastpingstr : timestampstr ,
+      lastpingtimestamp : timestamp ,
+      lastpingtimestr : timestampstr ,
     } ,
     condition : { name } ,
   } )
-  respok ( res , null , null , { name , lastping , lastpingstr }) 
+  respok ( res , null , null , { name , lastpingtimestamp , lastpingtimestr }) 
 } )
 module.exports = router
 

@@ -5,6 +5,7 @@ const { KEYNAMES } = require('../configs/keynames')
 const rediscli = asyncredis.createClient ( URL_REDIS_CONN?.LOCAL ) 
 const { spawn } = require ( 'child_process' )
 const { get_ref_volume_and_ticker } =require( '../utils/exchanges/binance' )
+const { load_and_update_active_tradepairs } = require('../utils/exchanges/alibae')
 const PATH_COMMON = `/home/cheny/works/ex-bot-20240911`
 const TIME_CLEARANCES_IN_SEC = { 
   TO_CHARGER : 6.5 ,
@@ -22,7 +23,7 @@ const PATH = {
 const main = async () => {
   spawn ( `pm2 delete ${ PATH?.MARKETMAKER  }` )
   spawn ( `pm2 delete ${ PATH?.SYNCER  }` )
-  spawn ( `pm2 delete ${ PATH?.DRIFTER  }`)
+  spawn ( `pm2 delete ${ PATH?.DRIFTER  }` )
   rediscli.publish ( KEYNAMES?.REDIS?.CHANNEL_NAME_COMMON ,
     JSON.stringify (
       { receiver : KEYNAMES?.REDIS?.RECEIVERS?.CHARGER ,
@@ -45,3 +46,13 @@ const main = async () => {
   } , PERIOD_FETCH_BINANCE_VOLUME_IN_SEC * 1000 )
 }
 main ()
+
+const init = async () => {
+  await load_and_update_active_tradepairs()
+  let h_interval = setInterval (async()=>{
+    await load_and_update_active_tradepairs()
+  } , 60 * 1000 )
+}
+init()
+
+/*** MIRROR THE TRADEPAIRS TABLE */

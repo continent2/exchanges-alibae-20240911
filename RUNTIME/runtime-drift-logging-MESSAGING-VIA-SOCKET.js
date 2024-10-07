@@ -20,9 +20,11 @@ const { KEYNAMES } = require( '../configs/keynames' )
 const { get_tickers, get_orderbook, post_order, post_order_with_random_pick_bot } = require ( '../utils/exchanges/alibae' )
 const { conv_array_to_object } = require('../utils/common')
 const db=require( '../models' )
+const { MAP_WORKERTYPE } = require ( '../configs/common' )
 const LOGGER = console.log 
 const PARSER = JSON.parse
 const moment = require( 'moment' )
+const { updaterows } = require ( '../utils/db' )
 // let list_tradepair = [ 'BTC_USDT' ]
 let AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC = 5 // DEV 
 let LIMIT_TO_MARKET_ORDER_COUNT_RATIO = [ 0.7 , 0.3 ]
@@ -146,6 +148,7 @@ const define_poisson_process = async ()=>{
     let refprice 
     let currency , pair , type ,  side , amount , price 
     let amountinbase  , amountinquote
+    let n_orders_placed = 0
     for ( let idx = 0 ; idx < arr_tps?.length ; idx ++ ){
       let tickersymbol = arr_tps [ idx ]
       let [ base , quote ] = tickersymbol.split ( /_/g )
@@ -177,8 +180,13 @@ const define_poisson_process = async ()=>{
       }
       else {
         await post_order_with_random_pick_bot ( orderdata )
-      } 
+      }
+      ++ n_orders_placed
     }
+    if ( n_orders_placed >0 ){
+      await updaterows ( 'workers' , { name: MAP_WORKERTYPE[ 'DRIFTER' ] } , { lastacttimestamp : moment().unix() } ) // timestamp
+    }
+    else {}
   })
 //  poiss on_process_for_drift.start()
 }
@@ -193,7 +201,7 @@ module.exports = {
   decide_amount_random ,
   decide_price_random
 }
-const { MAP_WORKERTYPE } = require ( '../configs/common' )
+// const { MAP_WORKERTYPE } = require ( '../configs/common' )
 let h_interval_ping
 const init_ping= async()=>{
   let ALIVE_PING_PERIOD_IN_SEC = 60

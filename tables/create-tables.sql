@@ -3,13 +3,27 @@ create user 'exbot'@localhost identified by 'Kw9bMWHt4Z' ;
 grant all privileges on exbot.* to 'exbot'@localhost ;
 flush privileges ;
 
+CREATE TABLE `tradepairs` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `createdat` datetime DEFAULT current_timestamp(),
+  `updatedat` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  symbol varchar( 50 ) ,
+  base varchar( 30 ) ,
+  quote varchar( 30 ) ,
+  currency varchar( 30 ) ,
+  pair varchar( 30 ) ,
+  active tinyint ,
+  PRIMARY KEY (`id`)
+) ;
+
+
 CREATE TABLE `workers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `createdat` datetime DEFAULT current_timestamp(),
   `updatedat` datetime DEFAULT NULL ON UPDATE current_timestamp(),
   name varchar(30) ,
   uuid varchar(50) ,
-  lastping bigint unsigned ,
+  lastpingtimestamp bigint unsigned ,
   status tinyint ,
   PRIMARY KEY (`id`)
 ) ;

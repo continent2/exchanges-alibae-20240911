@@ -1,7 +1,11 @@
 const axios= require( 'axios' )
 const { get_random_from_arr } = require ( '../common')
 const { KEYNAMES } = require('../../configs/keynames')
-const URL = `https://alibae.io/api`
+let URL 
+//   URL = `https://alibae.io/api`
+URL = `http://localhost:4000/api`
+const dbalibae = require( '../../models-alibae' )
+const { findall } = require('../db')
 // const APIKEY = '2UTcRUf0yIDCOHxgO6KfndhLE4erZxBJMOwc1nHuIhFexRPGVjoSa5xIBUxKs1Nk'
 const rediscli = require ( 'async-redis' ).createClient()
 const MAP_FUNCTION_NAME_TO_PATH = {
@@ -15,8 +19,8 @@ const MAP_FUNCTION_NAME_TO_ENDPOINT = ( name )=>{
 } // https://alibae.io/api/exchange/market?eco=false
 const normalize_ticker_symbol = str=> { return str.replace ( /\//g , '_' ) }
 const get_tickers = async ()=>{
-  let resp = await axios.get ( MAP_FUNCTION_NAME_TO_ENDPOINT( 'TICKERS') ) 
-  let jtickers = {}
+  let resp = await axios.get ( MAP_FUNCTION_NAME_TO_ENDPOINT( 'TICKERS' ) ) 
+  let jtickers = { }
   let arr_tickersymbols = Object.keys ( resp?.data ) //  jtickers
   for ( let idx = 0 ; idx< arr_tickersymbols?.length ; idx++ ){
     let tickersymbol = arr_tickersymbols[ idx ]
@@ -25,10 +29,15 @@ const get_tickers = async ()=>{
   return jtickers
 } // "ZRO/USDC": {   "last": 4.062,
 const get_trade_pairs = async ()=>{
-    let resp =await axios.get ( MAP_FUNCTION_NAME_TO_ENDPOINT ( 'TRADEPAIRS' ) )
-    if ( resp.status == 200 && resp?.data?.length ) { return resp?.data } 
-    else { console.log(`ERROR AT get_trade_pairs` ) ; return null }
+  let resp =await axios.get ( MAP_FUNCTION_NAME_TO_ENDPOINT ( 'TRADEPAIRS' ) )
+  if ( resp.status == 200 && resp?.data?.length ) { return resp?.data } 
+  else { console.log(`ERROR AT get_trade_pairs` ) ; return null }
 }
+const fetch_tradepairs_local = async ()=>{
+  let list_tp = await dbalibae[ 'exchange_market' ].findAll ({ raw: true , where : {    status : true  } } )
+  return list_tp
+}
+/**   const exchangeMarkets = await models.exchangeMarket.findAll({    where: {      status: true,    },  }); */
 const get_orderbook = async ( { base , quote , limit } )=>{
   let jqparams = ( limit && +limit>0 ) ? { limit} : {}
     let resp = await axios.get ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT ( 'ORDERBOOK' ) }/${ base }/${ quote }` , { params: { ... jqparams } } ) // ???
@@ -82,18 +91,44 @@ const post_order_with_random_pick_bot = async ( {   // useremail , apikey ,
   side ,
   amount ,
   price
-  } )=>{
+  } ) => {
   let { useremail , apikey } =  get_random_from_arr ( arr_useremail_apikeys )
   return await post_order ( { useremail , apikey , currency ,    pair ,    type ,    side ,    amount ,    price
   })  
 }
+const load_and_update_active_tradepairs = async ()=>{
+  let list_tp 
+  try { 
+    list_tp = await get_trade_pairs () ; LOGGER({dbpoint: 0  }) // , list_tp
+  } catch (err){ LOGGER( err )
+    list_tp = await fetch_tradepairs_local() ; ; LOGGER({dbpoint: 1  }) // , list_tp
+  }
+  /** MARK UP ONLY THE ACTIVE TRADE PAIRS AS SUCH , DEACTIVATE THE REST */
+  await updaterows( 'tradepairs' , {} , { active  : 0 } )
+  for ( let tp of list_tp) {
+    await upsert_sane ( { 
+      db , // : '' 
+      table : 'tradepairs' ,
+      values : { active : 1 , metadata : STRINGER( tp?.metadata ) ,
+        currency : tp?.currency,
+        pair : tp?.pair ,
+        base : tp?.currency ,
+        quote : tp?.pair ,
+      } ,
+      condition : { symbol: conv_mashdiv_currency_pair_to_symbol( { ... tp } )  } ,
+    } )
+  }
+  return list_tp
+}
 module.exports = { 
     MAP_FUNCTION_NAME_TO_ENDPOINT ,
     get_trade_pairs ,
+    fetch_tradepairs_local ,
     post_order ,
     post_order_with_random_pick_bot ,
     get_tickers ,
-    get_orderbook
+    get_orderbook,
+    load_and_update_active_tradepairs
 }
 const init = async ()=>{
   arr_useremail_apikeys = await get_user_apikeys_from_db ()

@@ -15,7 +15,9 @@ const { post_order : post_order_prod , post_order_with_random_pick_bot } = requi
 const {  post_order_bp } = require ( '../utils/exchanges/bp')
 // const { post_order : post_order_bp } = require ( '../utils/exchanges/bp')
 const { get_random_from_arr, conv_array_to_object } = require ( '../utils/common' )
-const { findall } = require('../utils/db')
+const { findall , updaterows } = require('../utils/db')
+const moment = require ( 'moment' )
+const { MAP_WORKERTYPE } = require ( '../configs/common' )
 let list_tradepair = [ 'BTC_USDT' ]
 // let list_tradepair = [ 'BTC_USDT' , 'ETH_USDT' ]
 const BIN_EP_SPOT_TICKER = `https://api.binance.com/api/v3/ticker/price?symbol=`
@@ -108,6 +110,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
   if ( MAX_STOP_SYMBOL_ITER_AT ){ max_iter_symbols = MAX_STOP_SYMBOL_ITER_AT }
   else { max_iter_symbols = list_tradepair?.length }
   arr_useremail_apikeys = await get_user_apikeys_from_db ()
+  let n_orders_placed = 0
 //  let arr_useremail_a pikeys = await get_user_apikeys_from_db ()
   for ( let idxsymbols = 0 ; idxsymbols < max_iter_symbols && idxsymbols < list_tradepair?.length ; idxsymbols ++ ){
     let tickersymbol_snake = list_tradepair [ idxsymbols ]
@@ -159,6 +162,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
              })
              LOGGER ( { resp } )
             }
+            ++ n_orders_placed
           }
         }
 //        continue
@@ -184,6 +188,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
               amount : orderamount ,
               price : orderprice , tickersymbol_snake
             })
+            ++ n_orders_placed
           }
         }
       }
@@ -192,6 +197,10 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
     catch {}
 //    process.exit ( 1 )
   }
+  if ( n_orders_placed >0 ){
+    await updaterows ( 'workers' , { name: MAP_WORKERTYPE[ 'MARKETMAKER' ] } , { lastacttimestamp : moment().unix() } ) // timestamp
+  }
+  else {}
 }
 // main ( { MAX_STOP_SYMBOL_ITER_AT : 10 } )
 false && main ( { MAX_STOP_SYMBOL_ITER_AT : 5  } )
@@ -208,7 +217,7 @@ SET BIN SIZE , MIN STEP SIZE ALONG PRICE AXIS
 PLACE LIMIT SELL ORDERS
 PLACE LIMIT BUY ORDERS
 */
-const { MAP_WORKERTYPE } = require ( '../configs/common' )
+// const { MAP_WORKERTYPE } = require ( '../configs/common' )
 let h_interval_ping
 const init_ping= async()=>{
   let ALIVE_PING_PERIOD_IN_SEC = 60

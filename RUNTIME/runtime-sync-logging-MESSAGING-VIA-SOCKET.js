@@ -16,6 +16,7 @@ const rediscli = require ( 'async-redis' ).createClient()
 const { get_tickers, get_orderbook, post_order, post_order_with_random_pick_bot } = require ( '../utils/exchanges/alibae' )
 const { conv_array_to_object } = require('../utils/common')
 const db= require( '../models' )
+const { updaterows } = require ( '../utils/db' )
 const moment = require( 'moment' )
 // let list_tradepair = [ 'BTC_USDT' ]
 let N_BINANCE_ORDERBOOK_ORDER_QUERY_COUNT_A_SIDE = 40
@@ -68,6 +69,7 @@ const is_trigger_sync = async ({ local_price , ref_price , }) =>{
 }
 const LOGGER  = console.log
 const sweep_up_counter_orders = async ( { tickersymbol , localprice , targetprice } ) =>{
+  let n_orders_placed = 0
   let delta = localprice - targetprice
   let absdelta= Math.abs ( localprice - targetprice )
   let signdelta = Math.sign ( delta )
@@ -114,6 +116,7 @@ const sweep_up_counter_orders = async ( { tickersymbol , localprice , targetpric
           }
           minabsdeltaprice = absdeltaprice
           idxatmin = idxorder
+          ++ n_orders_placed
         }
         else if ( minabsdeltaprice <= absdeltaprice ) {  LOGGER(`NO ACTIONS`) // THE REST CASES
           break
@@ -156,6 +159,7 @@ const sweep_up_counter_orders = async ( { tickersymbol , localprice , targetpric
           }
           minabsdeltaprice = absdeltaprice
           idxatmin = idxorder
+          ++ n_orders_placed
         }
         else if ( minabsdeltaprice <= absdeltaprice ){ // NOP
           break
@@ -166,6 +170,7 @@ const sweep_up_counter_orders = async ( { tickersymbol , localprice , targetpric
     case 0 : // PRICE ALREADY SYNC'ED => NOTHING TO DO ?
     break
   }
+  return n_orders_placed
 }
 const fs=require('fs')
 let fstream = fs.createWriteStream( "log-bot-sync.txt", {flags:'a'} )
@@ -191,6 +196,7 @@ const define_poisson_process = async ()=>{
     }
     /** LOCAL PRICE */
     let j_tickersymbol_prices = await get_tickers ()
+    let n_orders_placed = 0
     /** FETCH REF - BINANCE */
     for ( let idxtp = 0 ; idxtp< list_tradepair?.length ; idxtp ++ ) {
       let aproms = []
@@ -218,7 +224,7 @@ const define_poisson_process = async ()=>{
       let b_istrigger_sync = await is_trigger_sync ( { local_price : local_strikeprice , ref_price : ref_strikeprice } )
       fstream.write (`${moment().toISOString() }, b_istrigger_sync: ${ b_istrigger_sync }\n`)
       if ( b_istrigger_sync ) {
-        await sweep_up_counter_orders ( { 
+        n_orders_placed += await sweep_up_counter_orders ( { 
           tickersymbol , 
           localprice : local_strikeprice , 
           targetprice : ref_strikeprice 
@@ -228,7 +234,11 @@ const define_poisson_process = async ()=>{
       else {
         LOGGER ( `LOG@bot runtime: delta within threshold , ${ local_strikeprice } , ${ ref_strikeprice }`)
       } // DO NOT SYNC
-    }    
+    }
+    if ( n_orders_placed >0 ){
+      await updaterows ( 'workers' , { name: MAP_WORKERTYPE[ 'SYNCER' ] } , { lastacttimestamp : moment().unix() } ) // timestamp
+    }
+    else {}
   })
   
 }

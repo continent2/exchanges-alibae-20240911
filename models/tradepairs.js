@@ -1,7 +1,7 @@
 /* jshint indent: 2 */
 
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('workers', {
+  return sequelize.define('tradepairs', {
     id: {
       autoIncrement: true,
       type: DataTypes.INTEGER(10).UNSIGNED,
@@ -17,24 +17,23 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DATE,
       allowNull: true
     },
-    name: {
+    symbol: {
+      type: DataTypes.STRING(50),
+      allowNull: true
+    },
+    base: {
       type: DataTypes.STRING(30),
       allowNull: true
     },
-    uuid: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-      defaultValue: sequelize.fn('uuid')
-    },
-    lastpingtimestamp: {
-      type: DataTypes.BIGINT,
+    quote: {
+      type: DataTypes.STRING(30),
       allowNull: true
     },
-    status: {
-      type: DataTypes.INTEGER(4),
+    currency: {
+      type: DataTypes.STRING(30),
       allowNull: true
     },
-    lastpingtimestr: {
+    pair: {
       type: DataTypes.STRING(30),
       allowNull: true
     },
@@ -42,12 +41,17 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.INTEGER(4),
       allowNull: true
     },
-    lastacttimestamp: {
-      type: DataTypes.BIGINT,
+    metadata: {
+      type: DataTypes.TEXT,
       allowNull: true
+    },
+    isenabled: {
+      type: DataTypes.INTEGER(4),
+      allowNull: true,
+      comment: '0: disabled ,1:enabled, the rest: disabled'
     }
   }, {
     sequelize,
-    tableName: 'workers'
+    tableName: 'tradepairs'
   });
 };
