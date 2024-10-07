@@ -18,6 +18,7 @@ const { get_random_from_arr, conv_array_to_object } = require ( '../utils/common
 const { findall , updaterows } = require('../utils/db')
 const moment = require ( 'moment' )
 const { MAP_WORKERTYPE } = require ( '../configs/common' )
+const { enqueue_act_count_log } =require( '../utils/common' )
 let list_tradepair = [ 'BTC_USDT' ]
 // let list_tradepair = [ 'BTC_USDT' , 'ETH_USDT' ]
 const BIN_EP_SPOT_TICKER = `https://api.binance.com/api/v3/ticker/price?symbol=`
@@ -199,6 +200,7 @@ const main = async ( { MAX_STOP_SYMBOL_ITER_AT } )=>{
   }
   if ( n_orders_placed >0 ){
     await updaterows ( 'workers' , { name: MAP_WORKERTYPE[ 'MARKETMAKER' ] } , { lastacttimestamp : moment().unix() } ) // timestamp
+    enqueue_act_count_log ( { workertype : MAP_WORKERTYPE[ 'MARKETMAKER' ] , n_orders_placed  } )
   }
   else {}
 }

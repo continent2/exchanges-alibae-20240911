@@ -9,7 +9,7 @@ let MODE_DEV_PROD = 'DEV' // 'PROD'
 const axios = require( 'axios' )
 const db = require ( '../models' )
 const dbalibae =require( '../models-alibae' )
-const { conv_array_to_object , uuid }= require( '../utils/common')
+const { conv_array_to_object , uuid, enqueue_act_count_log }= require( '../utils/common')
 const { findall  , upsert, findone, updaterows } = require ('../utils/db')
 const { get_trade_pairs } = require( '../utils/exchanges/alibae')
 const LOGGER = console.log 
@@ -153,6 +153,7 @@ const chargeup_user_wallets_by_assets = async ( { j_assets_unique , arr_bot_ids 
    arr_assets = Object.keys( j_assets_unique ) 
    LOGGER ( {count : arr_assets?.length , arr_assets } )
 //   process.exit ( 1 )
+  let n_orders_placed = 0
   for ( let idxbot = 0 ; idxbot < arr_bot_ids?.length ; idxbot ++ ){
     let botid = arr_bot_ids [ idxbot ]
     let respuser = await dbalibae[ 'user'].findOne ( {raw: true , where : { email : botid }} )
@@ -168,8 +169,13 @@ const chargeup_user_wallets_by_assets = async ( { j_assets_unique , arr_bot_ids 
           type : 'SPOT' , 
           currency : arr_assets[ idxasset ] } ,
       })
+      ++ n_orders_placed
     }
   }
+  if ( n_orders_placed > 0 ){
+    await updaterows ( 'workers' , { name: MAP_WORKERTYPE[ 'CHARGER' ] } , { lastacttimestamp : moment().unix() } )
+    enqueue_act_count_log ( { workertype : MAP_WORKERTYPE[ 'CHARGER' ] , n_orders_placed  } )
+  } else {}
 }
 const chargeup = async () => {
   let listtp_raw = await get_trade_pairs ()
@@ -185,8 +191,7 @@ const chargeup = async () => {
   /** CHARGE UP */
 //  process.exit ( 1 )
   await chargeup_user_wallets_by_assets ( { j_assets_unique , arr_bot_ids })
-  let timestamp = moment().unix()
-  await updaterows ( 'workers' , { name: MAP_WORKERTYPE[ 'CHARGER' ] } , { lastacttimestamp : timestamp } )
+//  await updaterows ( 'workers' , { name: MAP_WORKERTYPE[ 'CHARGER' ] } , { lastacttimestamp : moment().unix() } )
   /**  TRADING PAIRS */
   // LOGGER ( { listtp_raw  } )
   await form_tp_datas ( { listtp_raw } )  

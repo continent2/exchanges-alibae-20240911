@@ -18,6 +18,7 @@ const { conv_array_to_object } = require('../utils/common')
 const db= require( '../models' )
 const { updaterows } = require ( '../utils/db' )
 const moment = require( 'moment' )
+const { enqueue_act_count_log } =require( '../utils/common' )
 // let list_tradepair = [ 'BTC_USDT' ]
 let N_BINANCE_ORDERBOOK_ORDER_QUERY_COUNT_A_SIDE = 40
 let THRESHOLD_PRICE_DELTA_TO_TRIGGER_SYNC_IN_PERCENT = 1.3 // PERCENT
@@ -237,6 +238,7 @@ const define_poisson_process = async ()=>{
     }
     if ( n_orders_placed >0 ){
       await updaterows ( 'workers' , { name: MAP_WORKERTYPE[ 'SYNCER' ] } , { lastacttimestamp : moment().unix() } ) // timestamp
+      enqueue_act_count_log ( { workertype : MAP_WORKERTYPE[ 'SYNCER' ] , n_orders_placed })
     }
     else {}
   })

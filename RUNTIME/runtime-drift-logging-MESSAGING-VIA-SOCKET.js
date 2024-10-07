@@ -18,7 +18,7 @@ const { gaussian, gaussian_with_polarity } = require ( '../utils/math' )
 const rediscli = require ( 'async-redis' ).createClient()
 const { KEYNAMES } = require( '../configs/keynames' )
 const { get_tickers, get_orderbook, post_order, post_order_with_random_pick_bot } = require ( '../utils/exchanges/alibae' )
-const { conv_array_to_object } = require('../utils/common')
+const { conv_array_to_object, enqueue_act_count_log } = require('../utils/common')
 const db=require( '../models' )
 const { MAP_WORKERTYPE } = require ( '../configs/common' )
 const LOGGER = console.log 
@@ -185,6 +185,7 @@ const define_poisson_process = async ()=>{
     }
     if ( n_orders_placed >0 ){
       await updaterows ( 'workers' , { name: MAP_WORKERTYPE[ 'DRIFTER' ] } , { lastacttimestamp : moment().unix() } ) // timestamp
+      enqueue_act_count_log ( { workertype : MAP_WORKERTYPE[ 'DRIFTER' ] , n_orders_placed } )
     }
     else {}
   })

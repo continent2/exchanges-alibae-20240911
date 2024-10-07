@@ -11,33 +11,36 @@ const { upsert, upsert_sane, findall, findone } = require('../../utils/db')
 const moment = require ( 'moment' )
 const LOGGER  = console.log
 const { MAP_WORKERTYPE } = require ( '../../configs/common' )
+const redisclihash = require ('async-redis').createClient()
 router.get ( '/statuses' , async ( req,res) =>{
   let respworkers = await findall( 'workers' , {} )
   let list = respworkers
   let timenow = moment().unix()
   let THRESHOLD_TELL_WORKER_ALIVE_OR_DEAD_IN_SEC = 150
-  let respsetting = await findone ( 'settings' , {
+  let respsetting_threshold = await findone ( 'settings' , {
     key : 'THRESHOLD_TELL_WORKER_ALIVE_OR_DEAD_IN_SEC',
     active : 1
   }) 
-  if ( Number.isFinite( +respsetting?.value )){ THRESHOLD_TELL_WORKER_ALIVE_OR_DEAD_IN_SEC = +respsetting?.value }
+  if ( Number.isFinite( +respsetting_threshold?.value )){ THRESHOLD_TELL_WORKER_ALIVE_OR_DEAD_IN_SEC = +respsetting_threshold?.value }
   else {} 
   let map_workertype_handled = MAP_WORKERTYPE
   list = list.map ( el => { let lastpingtimestamp
     if ( Number.isFinite( lastpingtimestamp = +el[ 'lastpingtimestamp' ] ) ){      let timedelta = timenow - lastpingtimestamp
       if ( timedelta < THRESHOLD_TELL_WORKER_ALIVE_OR_DEAD_IN_SEC ){
-              el['status'] = 'ALIVE'
+              el[ 'status' ] = 'ALIVE'
       }
-      else {  el['status'] = 'DEAD' }      
+      else {  el[ 'status' ] = 'DEAD' }      
     }
     else { el['status'] = 'UNKNOWN' }
     map_workertype_handled[ el?.name ] = true 
     return el
-  })
+  })  
   for ( let name of Object.keys ( map_workertype_handled )){
     if ( map_workertype_handled[ name ]){}
     else { list.push({ name , status : 'NOT-LAUNCHED'} )}
   }
+  
+  let resp = await redisclihash.lrange ( )
   respok ( res, null , null , { list } )
 } ) 
 router.get ( '/status' , async (req,res)=>{
