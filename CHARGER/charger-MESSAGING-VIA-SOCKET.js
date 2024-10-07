@@ -10,7 +10,7 @@ const axios = require( 'axios' )
 const db = require ( '../models' )
 const dbalibae =require( '../models-alibae' )
 const { conv_array_to_object , uuid }= require( '../utils/common')
-const { findall  , upsert } = require ('../utils/db')
+const { findall  , upsert, findone } = require ('../utils/db')
 const { get_trade_pairs } = require( '../utils/exchanges/alibae')
 const LOGGER = console.log 
 const asyncredis = require("async-redis")
@@ -236,4 +236,15 @@ true && create_common_channel_socket()
 module.exports = {
   main
 }
-
+const { MAP_WORKERTYPE } = require ( '../configs/common' )
+let h_interval_ping
+const init_ping= async()=>{
+  let ALIVE_PING_PERIOD_IN_SEC = 60
+  let respsetting = await findone( 'settings' , { key: 'ALIVE_PING_PERIOD_IN_SEC' , active : 1 })
+  if ( Number.isFinite( +respsetting?.value ) ){ ALIVE_PING_PERIOD_IN_SEC = +respsetting?.value }
+  else {}
+  h_interval_ping = setInterval ( async () => {
+    axios.post ( SCHEDULER?.PORT_HTTP , { name : MAP_WORKERTYPE?.CHARGER }).then( console.log )
+  } , ALIVE_PING_PERIOD_IN_SEC * 1000 )
+}
+init_ping()

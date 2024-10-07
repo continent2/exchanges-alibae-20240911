@@ -208,3 +208,15 @@ SET BIN SIZE , MIN STEP SIZE ALONG PRICE AXIS
 PLACE LIMIT SELL ORDERS
 PLACE LIMIT BUY ORDERS
 */
+const { MAP_WORKERTYPE } = require ( '../configs/common' )
+let h_interval_ping
+const init_ping= async()=>{
+  let ALIVE_PING_PERIOD_IN_SEC = 60
+  let respsetting = await findone( 'settings' , { key: 'ALIVE_PING_PERIOD_IN_SEC' , active : 1 })
+  if ( Number.isFinite( +respsetting?.value ) ){ ALIVE_PING_PERIOD_IN_SEC = +respsetting?.value }
+  else {}
+  h_interval_ping = setInterval ( async () => {
+    axios.post ( SCHEDULER?.PORT_HTTP , { name : MAP_WORKERTYPE?.MARKETMAKER }).then( console.log )
+  } , ALIVE_PING_PERIOD_IN_SEC * 1000 )
+}
+init_ping()

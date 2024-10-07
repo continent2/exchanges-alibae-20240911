@@ -18,6 +18,20 @@ const upsert = async ( { db , table , values, condition } ) => {
     return resp
   }
 }
+const upsert_sane = async ( { db , table , values, condition } ) => {  
+  let obj = await db [ table ].findOne({ where: condition })
+  let transaction = await db.sequelize.transaction( )
+  if ( obj ){ 
+    let resp = await obj.update( values , { transaction }) 
+    await transaction.commit()
+    return resp
+  }
+  else { 
+    let resp = await db [ table ].create( { ... values , ... condition ,  } , { transaction }  ) // id : uuid()
+    await transaction.commit()
+    return resp
+  }
+}
 const moverow=async(fromtable, jfilter, totable , auxdata)=>{
 	findone( fromtable, jfilter).then(async resp=>{
 		if(resp){
@@ -33,11 +47,14 @@ const moverow=async(fromtable, jfilter, totable , auxdata)=>{
 		}
 	})
 }
+const createrow=async(table,jdata)=>{return await db[table].create(jdata)}
 
 
 module.exports ={ 
   findall , 
   findone ,
   upsert ,
-  moverow
+  upsert_sane ,
+  moverow,
+  createrow
 }

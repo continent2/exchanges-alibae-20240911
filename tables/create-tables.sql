@@ -3,6 +3,16 @@ create user 'exbot'@localhost identified by 'Kw9bMWHt4Z' ;
 grant all privileges on exbot.* to 'exbot'@localhost ;
 flush privileges ;
 
+CREATE TABLE `workers` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `createdat` datetime DEFAULT current_timestamp(),
+  `updatedat` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  name varchar(30) ,
+  uuid varchar(50) ,
+  lastping bigint unsigned ,
+  status tinyint ,
+  PRIMARY KEY (`id`)
+) ;
 CREATE TABLE `tradevolumes` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `createdat` datetime DEFAULT current_timestamp(),
@@ -30,6 +40,8 @@ CREATE TABLE `settings` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `group_key` (`group`,`key`)
 ) ;
+
+
 insert into settings ( `group` , `key` , `value`,active ) values ( 'CHARGE', 'CHARGE_UPTO_AMOUNT' , '100_0000_0000' , 1 ) ; -- 10 Billions
 insert into settings ( `group` , `key` , `value`,active ) values ( 'CHARGE', 'CHARGE_PERIOD_IN_SEC' , '120',1 ) ;
 insert into settings ( `group` , `key` , `value`, active ) values ( 'CHARGE', 'CHARGE_INITIAL_DELAY_IN_SEC' , 1, 1 ) ;
