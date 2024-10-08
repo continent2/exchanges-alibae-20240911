@@ -1,7 +1,7 @@
 /* jshint indent: 2 */
 
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('settings', {
+  return sequelize.define('tradepairs', {
     id: {
       autoIncrement: true,
       type: DataTypes.INTEGER(10).UNSIGNED,
@@ -17,44 +17,41 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DATE,
       allowNull: true
     },
-    key: {
-      type: DataTypes.STRING(100),
+    symbol: {
+      type: DataTypes.STRING(50),
       allowNull: true
     },
-    subkey: {
-      type: DataTypes.STRING(100),
+    base: {
+      type: DataTypes.STRING(30),
       allowNull: true
     },
-    value: {
-      type: DataTypes.STRING(100),
+    quote: {
+      type: DataTypes.STRING(30),
+      allowNull: true
+    },
+    currency: {
+      type: DataTypes.STRING(30),
+      allowNull: true
+    },
+    pair: {
+      type: DataTypes.STRING(30),
       allowNull: true
     },
     active: {
       type: DataTypes.INTEGER(4),
       allowNull: true
     },
-    uuid: {
-      type: DataTypes.STRING(50),
-      allowNull: true
-    },
-    group: {
-      type: DataTypes.STRING(50),
-      allowNull: true
-    },
-    subvalue: {
+    metadata: {
       type: DataTypes.TEXT,
       allowNull: true
     },
-    comments: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    validationrule: {
-      type: DataTypes.TEXT,
-      allowNull: true
+    isenabled: {
+      type: DataTypes.INTEGER(4),
+      allowNull: true,
+      comment: '0: disabled ,1:enabled, the rest: disabled'
     }
   }, {
     sequelize,
-    tableName: 'settings'
+    tableName: 'tradepairs'
   });
 };

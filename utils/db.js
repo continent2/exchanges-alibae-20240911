@@ -51,7 +51,14 @@ const moverow=async(fromtable, jfilter, totable , auxdata)=>{
 	})
 }
 const createrow=async(table,jdata)=>{return await db[table].create(jdata)}
-
+const countrows_scalar = (table,jfilter)=>{
+  return new Promise ((resolve,reject)=>{
+    db[table].count({where:{... jfilter} } ).then(resp=>{
+      if(resp)  {resolve( resp)}
+      else      {resolve( )    }
+    })
+  })
+}
 module.exports ={ 
   updaterows ,
   findall , 
@@ -59,5 +66,6 @@ module.exports ={
   upsert ,
   upsert_sane ,
   moverow,
-  createrow
+  createrow , 
+  countrows_scalar
 }

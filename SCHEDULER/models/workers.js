@@ -1,7 +1,7 @@
 /* jshint indent: 2 */
 
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('settings', {
+  return sequelize.define('workers', {
     id: {
       autoIncrement: true,
       type: DataTypes.INTEGER(10).UNSIGNED,
@@ -17,44 +17,37 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DATE,
       allowNull: true
     },
-    key: {
-      type: DataTypes.STRING(100),
+    name: {
+      type: DataTypes.STRING(30),
       allowNull: true
     },
-    subkey: {
-      type: DataTypes.STRING(100),
+    uuid: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      defaultValue: sequelize.fn('uuid')
+    },
+    lastpingtimestamp: {
+      type: DataTypes.BIGINT,
       allowNull: true
     },
-    value: {
-      type: DataTypes.STRING(100),
+    status: {
+      type: DataTypes.INTEGER(4),
+      allowNull: true
+    },
+    lastpingtimestr: {
+      type: DataTypes.STRING(30),
       allowNull: true
     },
     active: {
       type: DataTypes.INTEGER(4),
       allowNull: true
     },
-    uuid: {
-      type: DataTypes.STRING(50),
-      allowNull: true
-    },
-    group: {
-      type: DataTypes.STRING(50),
-      allowNull: true
-    },
-    subvalue: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    comments: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    validationrule: {
-      type: DataTypes.TEXT,
+    lastacttimestamp: {
+      type: DataTypes.BIGINT,
       allowNull: true
     }
   }, {
     sequelize,
-    tableName: 'settings'
+    tableName: 'workers'
   });
 };

@@ -10,6 +10,8 @@ const workersrouter = require ( './routes/workers' )
 const usersrouter = require ( './routes/users' )
 const targetexchangesrouter =require( './routes/targetexchanges' )
 const tradepairsrouter =  require( './routes/tradepairs')
+const queriesrouter = require ( './routes/queries' )
+const settingsrouter = require ( './routes/settings' )
 var app = express()
 
 // view engine setup
@@ -29,7 +31,8 @@ app.use( '/users', usersrouter )
 app.use( '/users', usersrouter )
 app.use( '/targetexchanges', targetexchangesrouter )
 app.use( '/tradepairs', tradepairsrouter )
-
+app.use( '/queries', queriesrouter )
+app.use( '/settings', settingsrouter )
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

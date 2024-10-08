@@ -17,6 +17,41 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `sessionkeys`
+--
+
+DROP TABLE IF EXISTS `sessionkeys`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sessionkeys` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `createdat` datetime DEFAULT current_timestamp(),
+  `updatedat` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  `username` varchar(200) DEFAULT NULL,
+  `token` text DEFAULT NULL,
+  `ipaddress` varchar(64) DEFAULT NULL,
+  `useragent` varchar(1000) DEFAULT NULL,
+  `active` tinyint(4) DEFAULT 1,
+  `lastactive` varchar(30) DEFAULT NULL,
+  `useruuid` varchar(80) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `sessionkeys`
+--
+
+LOCK TABLES `sessionkeys` WRITE;
+/*!40000 ALTER TABLE `sessionkeys` DISABLE KEYS */;
+INSERT INTO `sessionkeys` VALUES
+(1,'2024-10-07 08:46:17',NULL,'admin00','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiSldUIiwiaWQiOjEsImNyZWF0ZWRhdCI6IjIwMjQtMTAtMDZUMjM6MTE6MTguMDAwWiIsInVwZGF0ZWRhdCI6bnVsbCwidXNlcm5hbWUiOiJhZG1pbjAwIiwicHciOiJxZ2p0amNwcjU5IiwicHdoYXNoIjpudWxsLCJsZXZlbCI6OTksImFjdGl2ZSI6MSwidXVpZCI6IjhlZDVhODc5LTg0M2EtMTFlZi04YTFkLWNhZTUxY2RlMDQ3YSIsImlhdCI6MTcyODI1ODM3NywiZXhwIjoxODM2MjU4Mzc3LCJpc3MiOiJFWFBSRVNTIn0.JXxwtotp3E6EYjDjmN77rhsRf5ceLGhqxBYLovzRPcI','::1',NULL,1,NULL,'8ed5a879-843a-11ef-8a1d-cae51cde047a'),
+(2,'2024-10-07 08:46:59',NULL,'admin00','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiSldUIiwiaWQiOjEsImNyZWF0ZWRhdCI6IjIwMjQtMTAtMDZUMjM6MTE6MTguMDAwWiIsInVwZGF0ZWRhdCI6bnVsbCwidXNlcm5hbWUiOiJhZG1pbjAwIiwicHciOiJxZ2p0amNwcjU5IiwicHdoYXNoIjpudWxsLCJsZXZlbCI6OTksImFjdGl2ZSI6MSwidXVpZCI6IjhlZDVhODc5LTg0M2EtMTFlZi04YTFkLWNhZTUxY2RlMDQ3YSIsImlhdCI6MTcyODI1ODQxOSwiZXhwIjoxODM2MjU4NDE5LCJpc3MiOiJFWFBSRVNTIn0.sBMq7QFRwKNDC1czR5-CAO6WZ_qqboiyk8bJowycXf8','::1',NULL,1,NULL,'8ed5a879-843a-11ef-8a1d-cae51cde047a'),
+(3,'2024-10-07 10:18:37',NULL,'admin00','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiSldUIiwiaWQiOjEsImNyZWF0ZWRhdCI6IjIwMjQtMTAtMDZUMjM6MTE6MTguMDAwWiIsInVwZGF0ZWRhdCI6bnVsbCwidXNlcm5hbWUiOiJhZG1pbjAwIiwicHciOiJxZ2p0amNwcjU5IiwicHdoYXNoIjpudWxsLCJsZXZlbCI6OTksImFjdGl2ZSI6MSwidXVpZCI6IjhlZDVhODc5LTg0M2EtMTFlZi04YTFkLWNhZTUxY2RlMDQ3YSIsImlhdCI6MTcyODI2MzkxNywiZXhwIjoxODM2MjYzOTE3LCJpc3MiOiJFWFBSRVNTIn0.W-ZRdNBDOqIohFeUc1uLSyMM0r1rL5fcMUfdb_Up-x4','::1',NULL,1,NULL,'8ed5a879-843a-11ef-8a1d-cae51cde047a');
+/*!40000 ALTER TABLE `sessionkeys` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `settings`
 --
 
@@ -35,9 +70,12 @@ CREATE TABLE `settings` (
   `group` varchar(50) DEFAULT NULL,
   `subvalue` text DEFAULT NULL,
   `comments` text DEFAULT NULL,
+  `validationrule` text DEFAULT NULL,
+  `name` text DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `group_key` (`group`,`key`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  UNIQUE KEY `group_key` (`group`,`key`),
+  KEY `keyindex` (`key`)
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -47,21 +85,123 @@ CREATE TABLE `settings` (
 LOCK TABLES `settings` WRITE;
 /*!40000 ALTER TABLE `settings` DISABLE KEYS */;
 INSERT INTO `settings` VALUES
-(15,'2024-09-25 17:05:03',NULL,'CHARGE_UPTO_AMOUNT',NULL,'100_0000_0000',1,NULL,'CHARGE',NULL,NULL),
-(16,'2024-09-25 17:05:03',NULL,'CHARGE_PERIOD_IN_SEC',NULL,'120',1,NULL,'CHARGE',NULL,NULL),
-(17,'2024-09-25 17:05:03',NULL,'REF_PRICE_DIVIDER_FOR_BIN_WIDTH',NULL,'10000',1,NULL,'MM',NULL,NULL),
-(18,'2024-09-25 17:05:03','2024-10-02 16:12:29','N_BINANCE_ORDERBOOK_ORDER_QUERY_COUNT_A_SIDE',NULL,'1000',1,NULL,'SYNC',NULL,NULL),
-(19,'2024-09-25 17:05:03','2024-10-02 14:01:39','THRESHOLD_PRICE_DELTA_TO_TRIGGER_SYNC_IN_PERCENT',NULL,'0.01',1,NULL,'SYNC',NULL,NULL),
-(20,'2024-09-25 17:05:03','2024-10-02 15:37:53','AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC',NULL,'4',1,NULL,'SYNC',NULL,NULL),
-(21,'2024-09-25 17:05:03','2024-09-26 08:40:03','REFPRICE_DIVIDER_FOR_STDEV_OF_RANDOM_PRICE_DIST',NULL,'30',0,NULL,'SYNC',NULL,NULL),
-(22,'2024-09-25 17:05:03',NULL,'AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC',NULL,'5',1,NULL,'DRIFT',NULL,NULL),
-(23,'2024-09-25 17:05:03',NULL,'LIMIT_TO_MARKET_ORDER_COUNT_RATIO',NULL,'[0.7,0.3]',1,NULL,'DRIFT',NULL,NULL),
-(24,'2024-09-25 17:05:03','2024-09-26 08:42:16','BUY_TO_SELL_FREQ_RATIO',NULL,'[0.5,0.5]',1,NULL,'DRIFT',NULL,NULL),
-(25,'2024-09-25 17:05:03','2024-10-02 11:16:13','ORDER_PRICE_DIST_STDEV',NULL,'0.10',1,NULL,'DRIFT',NULL,NULL),
-(26,'2024-09-25 17:05:03',NULL,'ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK',NULL,'0.01',1,NULL,'DRIFT',NULL,NULL),
-(27,'2024-09-26 10:36:04',NULL,'CHARGE_INITIAL_DELAY_IN_SEC',NULL,'1',1,NULL,'CHARGE',NULL,NULL),
-(28,'2024-10-02 16:22:03',NULL,'MODE_FILL_ORDERBOOK',NULL,'NULL',1,NULL,'MM',NULL,NULL);
+(15,'2024-09-25 17:05:03','2024-10-08 14:06:21','CHARGE_UPTO_AMOUNT',NULL,'100_0000_0000',1,'3319c1f9803459148ca86b0dce2a06e19f41db5c','CHARGE',NULL,NULL,'{\"datatype\":\"Number\",\"min\":100000000,\"max\":10000000000000000}',NULL),
+(16,'2024-09-25 17:05:03','2024-10-08 14:07:43','CHARGE_PERIOD_IN_SEC',NULL,'120',1,'d75e80475f9f97987396e8f6e202cebe867a6f40','CHARGE',NULL,NULL,'{\"datatype\":\"Number\",\"min\":30,\"max\":6000}',NULL),
+(17,'2024-09-25 17:05:03','2024-10-08 14:09:20','REF_PRICE_DIVIDER_FOR_BIN_WIDTH',NULL,'10000',1,'42a6ef8e88ed2215a562eafd35749348b8e85611','MM',NULL,NULL,'{\"datatype\":\"Number\",\"min\":10,\"max\":10000000}',NULL),
+(18,'2024-09-25 17:05:03','2024-10-08 14:10:19','N_BINANCE_ORDERBOOK_ORDER_QUERY_COUNT_A_SIDE',NULL,'1000',1,'ead73bf44694f373ba8dd78c8cfa3c3ce32be56f','SYNC',NULL,NULL,'{\"datatype\":\"Number\",\"min\":5,\"max\":100000000}',NULL),
+(19,'2024-09-25 17:05:03','2024-10-08 14:11:47','THRESHOLD_PRICE_DELTA_TO_TRIGGER_SYNC_IN_PERCENT',NULL,'0.01',1,'7274565bc6c0968e03211a5800da0908fb778c8e','SYNC',NULL,NULL,'{\"datatype\":\"Number\",\"min\":\"0.01\",\"max\":45}',NULL),
+(20,'2024-09-25 17:05:03','2024-10-08 14:13:10','AVERAGE_SYNC_INTERVAL_TO_REF_ORDERBOOK_IN_SEC',NULL,'4',1,'89c8f3743841b33d772150bbc8d36ab46f845e7f','SYNC',NULL,NULL,'{\"datatype\":\"Number\",\"min\":15,\"max\":600000}',NULL),
+(21,'2024-09-25 17:05:03','2024-10-08 11:46:46','REFPRICE_DIVIDER_FOR_STDEV_OF_RANDOM_PRICE_DIST',NULL,'30',0,'f549451fe60604ac7a594d78240f257f66ba57c5','SYNC',NULL,NULL,NULL,NULL),
+(22,'2024-09-25 17:05:03','2024-10-08 14:15:25','AVERAGE_DRIFT_ORDER_INTERVAL_IN_SEC',NULL,'5',1,'6e03a9b0ce151ffd518977db3b8d7af0da3404db','DRIFT',NULL,NULL,'{\"datatype\":\"Number\",\"min\":1,\"max\":600000}',NULL),
+(23,'2024-09-25 17:05:03','2024-10-08 14:18:15','LIMIT_TO_MARKET_ORDER_COUNT_RATIO',NULL,'[0.7,0.3]',1,'7361f9c708654bd778723b07bb23ab0e326c3c35','DRIFT',NULL,NULL,'{\"datatype\":\"Array\",\"length\":2,\"ex\":\"[63,37]\"}',NULL),
+(24,'2024-09-25 17:05:03','2024-10-08 14:19:02','BUY_TO_SELL_FREQ_RATIO',NULL,'[0.5,0.5]',1,'118ea7e50a44072ec066c0dd297c0bd0ae0d0f0e','DRIFT',NULL,NULL,'{\"datatype\":\"Array\",\"length\":2,\"ex\":\"[1,1]\"}',NULL),
+(25,'2024-09-25 17:05:03','2024-10-08 11:46:46','ORDER_PRICE_DIST_STDEV',NULL,'0.10',1,'ca51226081dd6c7ea51c8e8b7b158dca41f54396','DRIFT',NULL,NULL,NULL,NULL),
+(26,'2024-09-25 17:05:03','2024-10-08 11:46:46','ORDER_AMOUNT_MEAN_DEFAULT_FALLBACK',NULL,'0.01',1,'6d180e3285e852be123db248bdc3756b61f5c277','DRIFT',NULL,NULL,NULL,NULL),
+(27,'2024-09-26 10:36:04','2024-10-08 14:23:50','CHARGE_INITIAL_DELAY_IN_SEC',NULL,'1',1,'371bc27774332d06d9aedda7a48696475346da24','CHARGE',NULL,NULL,'{\"datatype\":\"Number\",\"min\":1,\"max\":10000}',NULL),
+(28,'2024-10-02 16:22:03','2024-10-08 11:46:46','MODE_FILL_ORDERBOOK',NULL,'NULL',1,'1a35b7e9561844f2f08ca487e0b118d6dfac9e68','MM',NULL,NULL,NULL,NULL),
+(29,'2024-10-07 09:28:30','2024-10-08 14:22:06','ALIVE_PING_PERIOD_IN_SEC',NULL,'60',1,'036ac109705b779a93d2c759fbf5214523085b87','COMMON',NULL,NULL,'{\"datatype\":\"Number\",\"min\":5,\"max\":10000}',NULL),
+(30,'2024-10-07 09:52:37','2024-10-08 14:21:19','THRESHOLD_TELL_WORKER_ALIVE_OR_DEAD_IN_SEC',NULL,'150',1,'871a2a94f40ca815010ed532712afe1d12498696','COMMON',NULL,NULL,'{\"datatype\":\"Number\",\"min\":5,\"max\":1000}',NULL),
+(31,'2024-10-07 16:22:36','2024-10-08 14:20:45','LOG_ACTS_COUNT_QUEUE_LENGTH',NULL,'50',1,'c237b7ff00b0e72eea1559c91038ff65062a42c4','COMMON',NULL,NULL,'{\"datatype\":\"Number\",\"min\":10,\"max\":100000}',NULL);
 /*!40000 ALTER TABLE `settings` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tradepairs`
+--
+
+DROP TABLE IF EXISTS `tradepairs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tradepairs` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `createdat` datetime DEFAULT current_timestamp(),
+  `updatedat` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  `symbol` varchar(50) DEFAULT NULL,
+  `base` varchar(30) DEFAULT NULL,
+  `quote` varchar(30) DEFAULT NULL,
+  `currency` varchar(30) DEFAULT NULL,
+  `pair` varchar(30) DEFAULT NULL,
+  `active` tinyint(4) DEFAULT NULL,
+  `metadata` text DEFAULT NULL,
+  `isenabled` tinyint(4) DEFAULT NULL COMMENT '0: disabled ,1:enabled, the rest: disabled',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tradepairs`
+--
+
+LOCK TABLES `tradepairs` WRITE;
+/*!40000 ALTER TABLE `tradepairs` DISABLE KEYS */;
+INSERT INTO `tradepairs` VALUES
+(1,'2024-10-07 12:25:49','2024-10-07 12:30:02','BTCUSDT',NULL,NULL,NULL,NULL,0,'{a:1,b:2}',NULL),
+(2,'2024-10-07 12:52:25','2024-10-07 13:05:17','BTC_USDT','BTC','USDT','BTC','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":9000},\"price\":{\"min\":0.01,\"max\":1000000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(3,'2024-10-07 13:01:08','2024-10-07 13:05:17','ZRO_USDC','ZRO','USDC','ZRO','USDC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":3,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":92141578},\"price\":{\"min\":0.001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(4,'2024-10-07 13:01:08','2024-10-07 13:05:17','XRP_TUSD','XRP','TUSD','XRP','TUSD',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":9222449},\"price\":{\"min\":0.0001,\"max\":10000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(5,'2024-10-07 13:01:08','2024-10-07 13:05:17','BTC_ZAR','BTC','ZAR','BTC','ZAR',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":0,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":922},\"price\":{\"min\":1,\"max\":99928191},\"cost\":{\"min\":100,\"max\":9000000},\"leverage\":{}}}',NULL),
+(6,'2024-10-07 13:01:08','2024-10-07 13:05:17','ZEN_BTC','ZEN','BTC','ZEN','BTC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":7,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":90000000},\"price\":{\"min\":1e-7,\"max\":1000},\"cost\":{\"min\":0.0001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(7,'2024-10-07 13:01:08','2024-10-07 13:05:17','XRP_USDC','XRP','USDC','XRP','USDC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":9222449},\"price\":{\"min\":0.0001,\"max\":10000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(8,'2024-10-07 13:01:08','2024-10-07 13:05:17','XVG_ETH','XVG','ETH','XVG','ETH',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":8,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":90000000},\"price\":{\"min\":1e-8,\"max\":1000},\"cost\":{\"min\":0.001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(9,'2024-10-07 13:01:08','2024-10-07 13:05:17','YGG_BTC','YGG','BTC','YGG','BTC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":8,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":92141578},\"price\":{\"min\":1e-8,\"max\":1000},\"cost\":{\"min\":0.0001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(10,'2024-10-07 13:01:09','2024-10-07 13:05:17','YGG_TRY','YGG','TRY','YGG','TRY',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":9222449},\"price\":{\"min\":0.01,\"max\":10000},\"cost\":{\"min\":10,\"max\":90000000},\"leverage\":{}}}',NULL),
+(11,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZEC_BTC','ZEC','BTC','ZEC','BTC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":7,\"amount\":3},\"limits\":{\"amount\":{\"min\":0.001,\"max\":10000000},\"price\":{\"min\":1e-7,\"max\":1000},\"cost\":{\"min\":0.0001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(12,'2024-10-07 13:01:09','2024-10-07 13:05:17','XRP_BRL','XRP','BRL','XRP','BRL',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":3,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":922327},\"price\":{\"min\":0.001,\"max\":100000},\"cost\":{\"min\":10,\"max\":9000000},\"leverage\":{}}}',NULL),
+(13,'2024-10-07 13:01:09','2024-10-07 13:05:17','YGG_USDT','YGG','USDT','YGG','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":92141578},\"price\":{\"min\":0.0001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(14,'2024-10-07 13:01:09','2024-10-07 13:05:17','XRP_MXN','XRP','MXN','XRP','MXN',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":3,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":92141578},\"price\":{\"min\":0.001,\"max\":1000},\"cost\":{\"min\":150,\"max\":9000000},\"leverage\":{}}}',NULL),
+(15,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_PLN','BTC','PLN','BTC','PLN',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":0,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":9223},\"price\":{\"min\":1,\"max\":9999319},\"cost\":{\"min\":25,\"max\":9000000},\"leverage\":{}}}',NULL),
+(16,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZIL_ETH','ZIL','ETH','ZIL','ETH',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":8,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":90000000},\"price\":{\"min\":1e-8,\"max\":1000},\"cost\":{\"min\":0.001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(17,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_FDUSD','BTC','FDUSD','BTC','FDUSD',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":9000},\"price\":{\"min\":0.01,\"max\":1000000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(18,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_ARS','BTC','ARS','BTC','ARS',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":0,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":67},\"price\":{\"min\":1,\"max\":1356378240},\"cost\":{\"min\":2000,\"max\":900000000},\"leverage\":{}}}',NULL),
+(19,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZRO_FDUSD','ZRO','FDUSD','ZRO','FDUSD',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":3,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":92141578},\"price\":{\"min\":0.001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(20,'2024-10-07 13:01:09','2024-10-07 13:05:17','YGG_USDC','YGG','USDC','YGG','USDC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":92141578},\"price\":{\"min\":0.0001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(21,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZRX_BTC','ZRX','BTC','ZRX','BTC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":8,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":90000000},\"price\":{\"min\":1e-8,\"max\":1000},\"cost\":{\"min\":0.0001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(22,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZEN_ETH','ZEN','ETH','ZEN','ETH',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":6,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":9000000},\"price\":{\"min\":0.000001,\"max\":1000},\"cost\":{\"min\":0.001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(23,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_BRL','BTC','BRL','BTC','BRL',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":0,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":9000},\"price\":{\"min\":1,\"max\":10000000},\"cost\":{\"min\":10,\"max\":9000000},\"leverage\":{}}}',NULL),
+(24,'2024-10-07 13:01:09','2024-10-07 13:05:17','XRP_BTC','XRP','BTC','XRP','BTC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":8,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":90000000},\"price\":{\"min\":1e-8,\"max\":1000},\"cost\":{\"min\":0.0001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(25,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZRO_BTC','ZRO','BTC','ZRO','BTC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":8,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":46116860414},\"price\":{\"min\":1e-8,\"max\":1},\"cost\":{\"min\":0.0001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(26,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_UAH','BTC','UAH','BTC','UAH',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":0,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":1800},\"price\":{\"min\":1,\"max\":51212504},\"cost\":{\"min\":100,\"max\":90000000},\"leverage\":{}}}',NULL),
+(27,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_DAI','BTC','DAI','BTC','DAI',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":9000},\"price\":{\"min\":0.01,\"max\":1000000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(28,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_USDC','BTC','USDC','BTC','USDC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":9000},\"price\":{\"min\":0.01,\"max\":1000000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(29,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZRX_USDT','ZRX','USDT','ZRX','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":900000},\"price\":{\"min\":0.0001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(30,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_EUR','BTC','EUR','BTC','EUR',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":9000},\"price\":{\"min\":0.01,\"max\":1000000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(31,'2024-10-07 13:01:09','2024-10-07 13:05:17','XVS_BTC','XVS','BTC','XVS','BTC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":7,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":90000000},\"price\":{\"min\":1e-7,\"max\":1000},\"cost\":{\"min\":0.0001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(32,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZRO_USDT','ZRO','USDT','ZRO','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":3,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":92141578},\"price\":{\"min\":0.001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(33,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZK_FDUSD','ZK','FDUSD','ZK','FDUSD',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":92141578},\"price\":{\"min\":0.0001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(34,'2024-10-07 13:01:09','2024-10-07 13:05:17','XVG_TRY','XVG','TRY','XVG','TRY',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":92141578},\"price\":{\"min\":0.0001,\"max\":1000},\"cost\":{\"min\":10,\"max\":90000000},\"leverage\":{}}}',NULL),
+(35,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZK_TRY','ZK','TRY','ZK','TRY',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":9222449},\"price\":{\"min\":0.01,\"max\":10000},\"cost\":{\"min\":10,\"max\":90000000},\"leverage\":{}}}',NULL),
+(36,'2024-10-07 13:01:09','2024-10-07 13:05:17','YFI_BTC','YFI','BTC','YFI','BTC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":9000},\"price\":{\"min\":0.0001,\"max\":100000},\"cost\":{\"min\":0.0001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(37,'2024-10-07 13:01:09','2024-10-07 13:05:17','XRP_TRY','XRP','TRY','XRP','TRY',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":92141578},\"price\":{\"min\":0.01,\"max\":1000},\"cost\":{\"min\":10,\"max\":90000000},\"leverage\":{}}}',NULL),
+(38,'2024-10-07 13:01:09','2024-10-07 13:05:17','YFI_USDT','YFI','USDT','YFI','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":0,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":9000},\"price\":{\"min\":1,\"max\":1000000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(39,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZEC_ETH','ZEC','ETH','ZEC','ETH',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":5,\"amount\":3},\"limits\":{\"amount\":{\"min\":0.001,\"max\":9000000},\"price\":{\"min\":0.00001,\"max\":1000},\"cost\":{\"min\":0.001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(40,'2024-10-07 13:01:09','2024-10-07 13:05:17','XRP_ETH','XRP','ETH','XRP','ETH',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":7,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":90000000},\"price\":{\"min\":1e-7,\"max\":1000},\"cost\":{\"min\":0.001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(41,'2024-10-07 13:01:09','2024-10-07 13:05:17','XNO_USDT','XNO','USDT','XNO','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":3,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":92141578},\"price\":{\"min\":0.001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(42,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_TUSD','BTC','TUSD','BTC','TUSD',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":9000},\"price\":{\"min\":0.01,\"max\":1000000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(43,'2024-10-07 13:01:09','2024-10-07 13:05:17','XVG_USDT','XVG','USDT','XVG','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":6,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":9222449},\"price\":{\"min\":0.000001,\"max\":10000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(44,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZIL_TRY','ZIL','TRY','ZIL','TRY',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":9222449},\"price\":{\"min\":0.0001,\"max\":10000},\"cost\":{\"min\":10,\"max\":90000000},\"leverage\":{}}}',NULL),
+(45,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZK_USDC','ZK','USDC','ZK','USDC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":92141578},\"price\":{\"min\":0.0001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(46,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZEN_USDT','ZEN','USDT','ZEN','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":900000},\"price\":{\"min\":0.01,\"max\":100000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(47,'2024-10-07 13:01:09','2024-10-07 13:05:17','XVS_TRY','XVS','TRY','XVS','TRY',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":1,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":922327},\"price\":{\"min\":0.1,\"max\":100000},\"cost\":{\"min\":10,\"max\":90000000},\"leverage\":{}}}',NULL),
+(48,'2024-10-07 13:01:09','2024-10-07 13:05:17','XRP_EUR','XRP','EUR','XRP','EUR',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":900000},\"price\":{\"min\":0.0001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(49,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZK_BTC','ZK','BTC','ZK','BTC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":8,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":46116860414},\"price\":{\"min\":1e-8,\"max\":1},\"cost\":{\"min\":0.0001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(50,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_MXN','BTC','MXN','BTC','MXN',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":0,\"amount\":6},\"limits\":{\"amount\":{\"min\":0.000001,\"max\":922},\"price\":{\"min\":1,\"max\":99928191},\"cost\":{\"min\":150,\"max\":9000000},\"leverage\":{}}}',NULL),
+(51,'2024-10-07 13:01:09','2024-10-07 13:05:17','XRP_USDT','XRP','USDT','XRP','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":9222449},\"price\":{\"min\":0.0001,\"max\":10000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(52,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_RON','BTC','RON','BTC','RON',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":0,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":9221},\"price\":{\"min\":1,\"max\":10000000},\"cost\":{\"min\":20,\"max\":9000000},\"leverage\":{}}}',NULL),
+(53,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZIL_BTC','ZIL','BTC','ZIL','BTC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":8,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":90000000},\"price\":{\"min\":1e-8,\"max\":1000},\"cost\":{\"min\":0.0001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(54,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZIL_USDT','ZIL','USDT','ZIL','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":5,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":9000000},\"price\":{\"min\":0.00001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(55,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_TRY','BTC','TRY','BTC','TRY',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":0,\"amount\":5},\"limits\":{\"amount\":{\"min\":0.00001,\"max\":4611},\"price\":{\"min\":1,\"max\":19998638},\"cost\":{\"min\":10,\"max\":90000000},\"leverage\":{}}}',NULL),
+(56,'2024-10-07 13:01:09','2024-10-07 13:05:17','XRP_JPY','XRP','JPY','XRP','JPY',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":922327},\"price\":{\"min\":0.01,\"max\":100000},\"cost\":{\"min\":100,\"max\":900000000},\"leverage\":{}}}',NULL),
+(57,'2024-10-07 13:01:09','2024-10-07 13:05:17','XTZ_USDT','XTZ','USDT','XTZ','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":3,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":900000},\"price\":{\"min\":0.001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(58,'2024-10-07 13:01:09','2024-10-07 13:05:17','XVS_BNB','XVS','BNB','XVS','BNB',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":5,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":900000},\"price\":{\"min\":0.00001,\"max\":10000},\"cost\":{\"min\":0.01,\"max\":9000000},\"leverage\":{}}}',NULL),
+(59,'2024-10-07 13:01:09','2024-10-07 13:05:17','XRP_BNB','XRP','BNB','XRP','BNB',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":7,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":9000000},\"price\":{\"min\":1e-7,\"max\":1000},\"cost\":{\"min\":0.01,\"max\":9000000},\"leverage\":{}}}',NULL),
+(60,'2024-10-07 13:01:09','2024-10-07 13:05:17','XVS_USDT','XVS','USDT','XVS','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":900000},\"price\":{\"min\":0.01,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(61,'2024-10-07 13:01:09','2024-10-07 13:05:17','BTC_JPY','BTC','JPY','BTC','JPY',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":0,\"amount\":6},\"limits\":{\"amount\":{\"min\":0.000001,\"max\":922},\"price\":{\"min\":1,\"max\":99928191},\"cost\":{\"min\":100,\"max\":900000000},\"leverage\":{}}}',NULL),
+(62,'2024-10-07 13:01:09','2024-10-07 13:05:17','XTZ_BTC','XTZ','BTC','XTZ','BTC',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":8,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":90000000},\"price\":{\"min\":1e-8,\"max\":1000},\"cost\":{\"min\":0.0001,\"max\":9000000},\"leverage\":{}}}',NULL),
+(63,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZEC_USDT','ZEC','USDT','ZEC','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":2,\"amount\":3},\"limits\":{\"amount\":{\"min\":0.001,\"max\":90000},\"price\":{\"min\":0.01,\"max\":100000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(64,'2024-10-07 13:01:09','2024-10-07 13:05:17','XRP_FDUSD','XRP','FDUSD','XRP','FDUSD',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":0},\"limits\":{\"amount\":{\"min\":1,\"max\":9222449},\"price\":{\"min\":0.0001,\"max\":10000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL),
+(65,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZRO_TRY','ZRO','TRY','ZRO','TRY',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":1,\"amount\":2},\"limits\":{\"amount\":{\"min\":0.01,\"max\":9222449},\"price\":{\"min\":0.1,\"max\":10000},\"cost\":{\"min\":10,\"max\":90000000},\"leverage\":{}}}',NULL),
+(66,'2024-10-07 13:01:09','2024-10-07 13:05:17','ZK_USDT','ZK','USDT','ZK','USDT',1,'{\"taker\":0.001,\"maker\":0.001,\"precision\":{\"price\":4,\"amount\":1},\"limits\":{\"amount\":{\"min\":0.1,\"max\":92141578},\"price\":{\"min\":0.0001,\"max\":1000},\"cost\":{\"min\":5,\"max\":9000000},\"leverage\":{}}}',NULL);
+/*!40000 ALTER TABLE `tradepairs` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2855,6 +2995,71 @@ INSERT INTO `tradevolumes` VALUES
 (2760,'2024-10-04 16:19:36',NULL,NULL,'0.00085690','15738.51835702','19327373.00',NULL,1728026366,'NEIROEUR');
 /*!40000 ALTER TABLE `tradevolumes` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `createdat` datetime DEFAULT current_timestamp(),
+  `updatedat` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  `username` varchar(50) DEFAULT NULL,
+  `pw` varchar(20) DEFAULT NULL,
+  `pwhash` varchar(200) DEFAULT NULL,
+  `level` tinyint(4) DEFAULT NULL COMMENT '0:common user , admin>=90, 99: root',
+  `active` tinyint(4) DEFAULT NULL,
+  `uuid` varchar(50) DEFAULT uuid(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES
+(1,'2024-10-07 08:11:18',NULL,'admin00','qgjtjcpr59',NULL,99,1,'8ed5a879-843a-11ef-8a1d-cae51cde047a');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `workers`
+--
+
+DROP TABLE IF EXISTS `workers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `workers` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `createdat` datetime DEFAULT current_timestamp(),
+  `updatedat` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  `name` varchar(30) DEFAULT NULL,
+  `uuid` varchar(50) DEFAULT uuid(),
+  `lastpingtimestamp` bigint(20) unsigned DEFAULT NULL,
+  `status` tinyint(4) DEFAULT NULL,
+  `lastpingtimestr` varchar(30) DEFAULT NULL,
+  `active` tinyint(4) DEFAULT NULL,
+  `lastacttimestamp` bigint(20) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `workers`
+--
+
+LOCK TABLES `workers` WRITE;
+/*!40000 ALTER TABLE `workers` DISABLE KEYS */;
+INSERT INTO `workers` VALUES
+(1,'2024-10-07 09:19:05','2024-10-07 10:01:30','CHARGER','b1b09568-8447-11ef-8a1d-cae51cde047a',1728260461,NULL,'2024-10-07T00:21:01.953Z',NULL,NULL);
+/*!40000 ALTER TABLE `workers` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -2865,4 +3070,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-04 16:44:33
+-- Dump completed on 2024-10-08 15:43:06

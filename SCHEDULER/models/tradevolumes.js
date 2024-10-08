@@ -1,7 +1,7 @@
 /* jshint indent: 2 */
 
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('settings', {
+  return sequelize.define('tradevolumes', {
     id: {
       autoIncrement: true,
       type: DataTypes.INTEGER(10).UNSIGNED,
@@ -17,44 +17,37 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DATE,
       allowNull: true
     },
-    key: {
-      type: DataTypes.STRING(100),
+    symbol: {
+      type: DataTypes.STRING(30),
       allowNull: true
     },
-    subkey: {
-      type: DataTypes.STRING(100),
+    price: {
+      type: DataTypes.STRING(30),
       allowNull: true
     },
-    value: {
-      type: DataTypes.STRING(100),
+    volumeinquote: {
+      type: DataTypes.STRING(30),
       allowNull: true
     },
-    active: {
-      type: DataTypes.INTEGER(4),
+    volumeinbase: {
+      type: DataTypes.STRING(30),
       allowNull: true
     },
-    uuid: {
-      type: DataTypes.STRING(50),
+    refex: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      comment: 'default null=>binance, designate in this field if any other'
+    },
+    timestamp: {
+      type: DataTypes.BIGINT,
       allowNull: true
     },
-    group: {
-      type: DataTypes.STRING(50),
-      allowNull: true
-    },
-    subvalue: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    comments: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    validationrule: {
-      type: DataTypes.TEXT,
+    symbolref: {
+      type: DataTypes.STRING(30),
       allowNull: true
     }
   }, {
     sequelize,
-    tableName: 'settings'
+    tableName: 'tradevolumes'
   });
 };

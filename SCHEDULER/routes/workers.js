@@ -26,10 +26,8 @@ router.get ( '/statuses' , async ( req,res) =>{
   let map_workertype_handled = MAP_WORKERTYPE
   list = list.map ( el => { let lastpingtimestamp
     if ( Number.isFinite( lastpingtimestamp = +el[ 'lastpingtimestamp' ] ) ){      let timedelta = timenow - lastpingtimestamp
-      if ( timedelta < THRESHOLD_TELL_WORKER_ALIVE_OR_DEAD_IN_SEC ){
-              el[ 'status' ] = 'ALIVE'
-      }
-      else {  el[ 'status' ] = 'DEAD' }      
+      if ( timedelta < THRESHOLD_TELL_WORKER_ALIVE_OR_DEAD_IN_SEC ) {  el[ 'status' ] = 'ALIVE' }
+      else                                                          {  el[ 'status' ] = 'DEAD' }
     }
     else { el['status'] = 'UNKNOWN' }
     map_workertype_handled[ el?.name ] = true 
@@ -39,8 +37,15 @@ router.get ( '/statuses' , async ( req,res) =>{
     if ( map_workertype_handled[ name ]){}
     else { list.push({ name , status : 'NOT-LAUNCHED'} )}
   }
-  
-  let resp = await redisclihash.lrange ( )
+  /*  let LOG_ACTS_COUNT_QUEUE_LENGTH = 50
+    let respsetting = await findone ( 'settings' , { key: 'LOG_ACTS_COUNT_QUEUE_LENGTH' , active : 1 } )
+    if ( Number.isFinite( +respsetting?.value )){ LOG_ACTS_COUNT_QUEUE_LENGTH = +respsetting?.value }
+    else {} */
+  for ( let idx =0 ; idx< list?.length ; idx++ ) {
+    let { name : workertype } = list[ idx ]
+    let resp = await redisclihash.lrange ( `${ KEYNAMES?.REDIS?.LOG_ACTS }-${ workertype }`, 0, -1 )
+    list[ idx] [ `${ KEYNAMES?.REDIS?.LOG_ACTS }` ] = JSON.stringify( resp )
+  }    
   respok ( res, null , null , { list } )
 } ) 
 router.get ( '/status' , async (req,res)=>{

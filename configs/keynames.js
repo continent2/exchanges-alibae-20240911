@@ -18,7 +18,8 @@ const KEYNAMES = {
     ACTIONS : {
       RESTART : 'RESTART' ,
       START : 'START' ,
-    }
+    } , 
+    LOG_ACTS : 'LOG_ACTS' ,
     // MESSAGE_TYPE_CH ARGER : 'SIGNAL_CHA RGER' ,
   }
 }

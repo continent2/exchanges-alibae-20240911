@@ -48,10 +48,6 @@ module.exports = function(sequelize, DataTypes) {
     comments: {
       type: DataTypes.TEXT,
       allowNull: true
-    },
-    validationrule: {
-      type: DataTypes.TEXT,
-      allowNull: true
     }
   }, {
     sequelize,
