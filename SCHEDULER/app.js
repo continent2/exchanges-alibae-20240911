@@ -48,5 +48,9 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
+const moment= require( 'moment' )
+console.log ( `${  moment().toISOString() }@exbot`)
+let h = setInterval( ()=>{
+  console.log ( `${  moment().toISOString() }@exbot`)
+} , 60 * 1000 )
 module.exports = app;
