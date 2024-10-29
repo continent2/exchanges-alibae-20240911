@@ -1,9 +1,7 @@
 const axios= require( 'axios' )
 const { get_random_from_arr } = require ( '../common')
 const { KEYNAMES } = require('../../configs/keynames')
-let URL 
-//   URL = `https://alibae.io/api`
-URL = `http://localhost:4000/api`
+let URL = `http://localhost:4000/api` //   URL = `https://alibae.io/api`
 const dbalibae = require( '../../models-alibae' )
 const { findall } = require('../db')
 // const APIKEY = '2UTcRUf0yIDCOHxgO6KfndhLE4erZxBJMOwc1nHuIhFexRPGVjoSa5xIBUxKs1Nk'
