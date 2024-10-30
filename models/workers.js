@@ -45,6 +45,10 @@ module.exports = function(sequelize, DataTypes) {
     lastacttimestamp: {
       type: DataTypes.BIGINT,
       allowNull: true
+    },
+    lastacttimestr: {
+      type: DataTypes.STRING(30),
+      allowNull: true
     }
   }, {
     sequelize,

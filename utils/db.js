@@ -16,7 +16,8 @@ const upsert = async ( { db , table , values, condition } ) => {
     return resp
   }
   else { 
-    let resp = await db [ table ].create( { ... values , ... condition , id : uuid() } , { transaction }  )
+    let resp = await db [ table ].create( { ... values , ... condition , } , { transaction }  )
+//    let resp = await db [ table ].create( { ... values , ... condition , id : uuid() } , { transaction }  )
     await transaction.commit()
     return resp
   }

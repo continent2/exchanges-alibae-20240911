@@ -118,7 +118,7 @@ router.post ( '/ping' , async (req,res) =>{
   const ipaddress  = getipaddress( req )
   const timestamp = moment().unix()
   const timestampstr = moment().toISOString()
-  await upsert  ( { // upsert_sane
+  await upsert_sane  ( {
     db , // :'' , 
     table : 'workers' ,
     values : { 
@@ -127,7 +127,7 @@ router.post ( '/ping' , async (req,res) =>{
     } ,
     condition : { name } ,
   } )
-  respok ( res , null , null , { name , lastpingtimestamp : timestamp , lastpingtimestr : timestampstr }) 
+  respok ( res , null , null , { name , lastpingtimestamp , lastpingtimestr }) 
 } )
 module.exports = router
 

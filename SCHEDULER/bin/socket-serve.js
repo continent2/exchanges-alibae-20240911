@@ -44,7 +44,7 @@ const moment = require('moment');
 const messenger = require( 'messenger' )
 const { // URL_SELF_DEF_BASE // , UUID_NAMESPACE, 
 	SCHEDULER
-}=require('../../configs/scheduler')
+}=require ( '../../configs/scheduler' )
 const msgreceiver = messenger.createListener( SCHEDULER?.PORT_INTERNAL_MESSENGER )
 // const {
   // bindUsernameSocketid,

@@ -67,11 +67,10 @@ const post_order = async ( {
     else { console.log(`ERROR AT post_order : arg missing` ) ; return null }
     if ( Number.isFinite(+amount) ){}
     else { console.log(`ERROR AT post_order : arg invalid-amount` ) ; return null }
-    if ( price ){
+    if ( type.match ( /limit/g )) { // if ( price ){
         if ( Number.isFinite (+price)){}
         else { console.log( `ERROR AT post_order : arg invalid`); return null }
-    }
-//    red iscli.hget ( )
+    } else {} //    red iscli.hget ( )
     let resp = await axios.post ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT( 'ORDER' ) }` , {
       currency ,
       pair ,
@@ -119,14 +118,14 @@ const load_and_update_active_tradepairs = async ()=>{
   return list_tp
 }
 module.exports = { 
-    MAP_FUNCTION_NAME_TO_ENDPOINT ,
-    get_trade_pairs ,
-    fetch_tradepairs_local ,
-    post_order ,
-    post_order_with_random_pick_bot ,
-    get_tickers ,
-    get_orderbook,
-    load_and_update_active_tradepairs
+  MAP_FUNCTION_NAME_TO_ENDPOINT ,
+  get_trade_pairs ,
+  fetch_tradepairs_local ,
+  post_order ,
+  post_order_with_random_pick_bot ,
+  get_tickers ,
+  get_orderbook,
+  load_and_update_active_tradepairs
 }
 const init = async ()=>{
   arr_useremail_apikeys = await get_user_apikeys_from_db ()
