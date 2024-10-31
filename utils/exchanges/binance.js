@@ -75,10 +75,20 @@ const parse_orderbook = ({ j_ob })=>{
   total_volume: 8.28942
 } */
 let j_spot_ticker_resp = { symbol: 'BTCUSDT', price: '57727.99000000' }
+const BINANCE_EP_ORDERBOOK = `https://api.binance.com/api/v3/depth` // ?limit=10&symbol=`
+const get_orderbook = async ( { base , quote , limit } ) =>{
+  if ( +limit && +limit >=1 ){} else { LOGGER('!!! INVALID ARG@get_orderbook'); return null }
+  let resp  = await axios.get ( `${ BINANCE_EP_ORDERBOOK }?limit=${ limit }&symbol=${ base }${ quote }` )
+  if ( +resp?.status < 400 ){ }
+  else { LOGGER( ) ; return null }
+}
+
 module.exports= { 
   get_ref_volume_and_ticker ,
   parse_orderbook , 
-  get_mean_order_amount_from_orderbook } //  j_ob_ex ,
+  get_mean_order_amount_from_orderbook ,
+  get_orderbook
+} //  j_ob_ex ,
 
 let j_ob_ex = {
   "lastUpdateId": 51764995056,

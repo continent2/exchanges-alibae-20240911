@@ -34,7 +34,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     amountfloat: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DOUBLE,
       allowNull: true
     },
     lockedchar: {
@@ -46,7 +46,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     lockedfloat: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DOUBLE,
       allowNull: true
     },
     availchar: {
@@ -58,7 +58,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     availfloat: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DOUBLE,
       allowNull: true
     },
     uid: {
@@ -88,6 +88,10 @@ module.exports = function(sequelize, DataTypes) {
     },
     assetnetype: {
       type: DataTypes.STRING(40),
+      allowNull: true
+    },
+    uuid: {
+      type: DataTypes.STRING(50),
       allowNull: true
     }
   }, {

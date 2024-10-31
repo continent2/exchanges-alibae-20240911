@@ -5,6 +5,9 @@ const { KEYNAME_APIKEY }=require ( '../../configs/configs' )
 const { PORTS } = require ( '../../configs/ports' )
 let URL = `http://localhost:${ PORTS?.EXCHANGES_CUSTOM_HTTP }`
 const dbcustom = require ( '../../models-custom' )
+const { findall } = require('../db')
+const db = require ( '../../models' )
+// const { get_user_apike ys_from_db } = require('../../INIT-OB/initob-MESSAGING-VIA-SOCKET-CUSTOM-EXCHANGES')
 const rediscli = require ( 'async-redis').createClient() 
 const MAP_FUNCTION_NAME_TO_PATH = {
   TRADEPAIRS  : `queries/rows/markethasassets/active/1/0/10000/id/DESC` ,
@@ -44,28 +47,30 @@ const get_orderbook = async ( { base , quote , limit } ) =>{
   if ( resp?.data?.status == 'OK'){}
   else { LOGGER( ) ; return null }
 }
-let arr_useremail_apikeys
-const get_user_apikeys_from_db = async ()=>{
-  let j_useremail_keys = await rediscli.hgetall ( KEYNAMES?.REDIS?.APIKEY )
+let arr_useremail_apikeys = [ ]
+const get_user_apikeys_from_local = async ()=>{  return arr_useremail_apikeys } // const get_user_apikeys_ from_db = async () => {
+const setup_user_apikeys_from_cache = async () => {  
+  let j_useremail_keys = await rediscli.hgetall ( KEYNAMES?.REDIS?.USERUUID_APIKEY )
+  let j_username_keys  = await rediscli.hgetall ( KEYNAMES?.REDIS?.USERUUID_USERNAME )
   let arr_useremails = Object.keys ( j_useremail_keys )
-  if ( arr_useremail_apikeys?.length ){}
-  else { arr_useremail_apikeys = await get_user_apikeys_from_db () } 
-  if ( arr_useremail_apikeys?.length ){}
-  else { return null }
+  if ( arr_useremails?.length ){}
+  else { return null } // let resp = await findall( 'users' , { }, [ 'username' , 'email' , ] )    }
   let arr_useremail_apikeys = Object.keys ( j_useremail_keys ).map ( el =>{ 
-    return { useremail : el , apikey : j_useremail_keys[ el ] }})
+    return { useremail : el , apikey : j_useremail_keys[ el ] , username : j_username_keys [ el ] }})
   return arr_useremail_apikeys
+/*  if ( arr_useremail_apikeys?.length ){}   else { arr_useremail_apikeys = await get_u ser_apikeys_from_db () } 
+  if ( arr_useremail_apikeys?.length ){}   else { return null }   return arr_useremail_apikeys */
 }
 const post_order = async ( {
   apikey ,  // useremail , 
-  currency ,
-  pair ,
+  asset ,
+  market , //pair ,
   type ,
   side ,
   amount ,
-  price
+  price , usernametest
 }  ) =>{
-  if ( currency && pair && type && side && amount ){}
+  if ( asset && market && type && side && amount ){}
   else { console.log(`ERROR AT post_order : arg missing` ) ; return null }
   if ( Number.isFinite(+amount) ){}
   else { console.log(`ERROR AT post_order : arg invalid-amount` ) ; return null }
@@ -74,21 +79,27 @@ const post_order = async ( {
       else { console.log( `ERROR AT post_order : arg invalid`); return null }
   } else {} // ORDER       : `orders/order` , // /:market/:asset/:type/:amount/:price` ,
   let headers = {} ; headers[ KEYNAME_APIKEY ] = apikey
-  let resp = await axios.post ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT( 'ORDER' ) }/${pair}/${ currency}/${type}/${amount}/${price}` , { } , { headers } )
+  LOGGER ( { url : `${ MAP_FUNCTION_NAME_TO_ENDPOINT( 'ORDER' ) }/${market}/${ asset}/${type}/${amount}/${price}` ,
+    usernametest
+  })
+  let resp = await axios.post ( `${ MAP_FUNCTION_NAME_TO_ENDPOINT( 'ORDER' ) }/${market}/${ asset}/${type}/${amount}/${price}` , { usernametest } ) // , { headers } )
   if ( resp?.data?.status == 'OK' ){ return resp?.data }
-  else { console.log( `ERROR AT post_order`) ; return resp }
+  else { console.log( `ERROR AT post_order`) ; return null }
 }
 const post_order_with_random_pick_bot = async ( {   // useremail , apikey , 
-  currency ,
-  pair ,
+  asset ,
+  market , // pair ,
   type ,
   side ,
   amount ,
   price
-  } ) => {
+} ) => {
+  if ( arr_useremail_apikeys?.length ){}
+  else { arr_useremail_apikeys = await get_user_apikeys_from_local () }
   let { useremail , username , apikey } =  get_random_from_arr ( arr_useremail_apikeys )
-  return await post_order ( { apikey , currency ,    pair ,    type ,    side ,    amount ,    price
-  }) // useremail ,
+  let resporder = await post_order ( { apikey , asset , market    ,    type ,    side ,    amount ,    price , usernametest : username  
+  }) // useremail ,pair
+  return resporder 
 }
 const conv_asset_market_to_symbol = ({ asset , market }) => `${ asset }_${ market }`
 const load_and_update_active_tradepairs = async ()=>{
@@ -105,9 +116,9 @@ const load_and_update_active_tradepairs = async ()=>{
       db , // : '' 
       table : 'tradepairs' ,
       values : { active : 1 , // metadata : STRINGER( tp?.metadata ) ,
-        asset  : tp?.asset , // currency,
+        asset  : tp?.asset , // cur rency,
         market : tp?.market , // pair ,
-        base : tp?.asset , // currency ,
+        base : tp?.asset , // curre ncy ,
         quote : tp?.market , // pair ,
       } ,
       condition : { symbol: conv_asset_market_to_symbol( { ... tp } )  } ,
@@ -123,11 +134,14 @@ module.exports = {
   post_order_with_random_pick_bot ,
   get_tickers ,
   get_orderbook,
-  load_and_update_active_tradepairs
+  load_and_update_active_tradepairs , 
+  get_user_apikeys_from_local
 }
 const init = async ()=>{
-  arr_useremail_apikeys = await get_user_apikeys_from_db ()
+  arr_useremail_apikeys = await setup_user_apikeys_from_cache () // get_use r_apikeys_from_db ()
 }
+// false && init()
+true && init()
 /* {
   "status": "OK",
   "message": null,

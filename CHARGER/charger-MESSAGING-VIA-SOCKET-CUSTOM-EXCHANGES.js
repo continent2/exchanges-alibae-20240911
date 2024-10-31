@@ -16,7 +16,7 @@ const LOGGER = console.log
 const asyncredis = require( "async-redis" )
 const moment = require('moment')
 const { URL_REDIS_CONN  } = require ( '../configs/redis' )
-const { KEYNAMES } = require('../configs/keynames')
+const { KEYNAMES } = require( '../configs/keynames')
 const { MAP_WORKERTYPE } = require ( '../configs/common' )
 const redisclihash = asyncredis.createClient( ) // URL_REDIS_CONN?.LOCAL )
 const crypto = require ( 'crypto' )
@@ -69,16 +69,18 @@ const create_api_key = async ()=>{   let format = 'pem'
   let resp = crypto.generateKeyPairSync('ed25519', {    publicKeyEncoding: {      type: 'spki',      format , // : 'pem'
     },
     privateKeyEncoding: {      type: 'pkcs8',      format, // : 'pem'
-    }  } )
+    } } )
   return { publickey : cleanup_key ( resp?.publicKey ) , privatekey : cleanup_key ( resp?.privateKey ) }  // , (err, publickey, privatekey ) => {  LOGGER({ err })    return { publickey, privatekey }  }   )
 }
-const ensure_exists_or_create_users = async () => { LOGGER ( { arr_bot_emails })
+// let j_useremail_keys = await rediscli.hgetall ( KEYNAMES?.REDIS?.USERUUID_APIKEY )
+const ensure_exists_or_create_users = async () => { LOGGER ( { arr_bot_emails } )
   for ( let idxbot = 0 ; idxbot< arr_bot_emails?.length ; idxbot ++ ){
     let email = arr_bot_emails [ idxbot ]
-    let respuser = await dbcustom[ 'users' ].findOne( {raw: true, where : { email } })
+    let respuser = await dbcustom[ 'users' ].findOne( { raw: true, where : { email } })
     let timenow = dbcustom.sequelize.fn( 'NOW' )
     let useruuid = uuid()
-    if ( respuser ){ }
+    if ( respuser ){       useruuid = respuser?.uuid
+    }
     else { //      let transaction = await db.sequelize.transaction( )
       respuser = await dbcustom[ 'users' ].create ( {  //        id : uuid() ,
         email  ,//        roleId : 4,
@@ -100,8 +102,9 @@ const ensure_exists_or_create_users = async () => { LOGGER ( { arr_bot_emails })
         createdAt : timenow ,        updatedAt : timenow ,      } // , { transaction } 
       ) */ //      await transaction.commit()
     }
-//  await redisclihash.hset ( KEYNAMES?.REDIS?.APIKEY , arr_bot_emails[ idxbot ] , respapikey?.publickey || respapikey?.apikey  )
-    await redisclihash.hset ( KEYNAMES?.REDIS?.APIKEY , useruuid  , respapikey?.publickey || respapikey?.apikey  )
+//  await redisclihash.hset ( KEYNAMES?.REDIS?.USERUUID_APIKEY , arr_bot_emails[ idxbot ] , respapikey?.publickey || respapikey?.apikey  )
+    await redisclihash.hset ( KEYNAMES?.REDIS?.USERUUID_APIKEY    , useruuid  , respapikey?.publickey || respapikey?.apikey  )
+    await redisclihash.hset ( KEYNAMES?.REDIS?.USERUUID_USERNAME  , useruuid  , respuser?.username  )
   }
 }
 // const newKey = await models.apiKey.cre ate({
@@ -122,6 +125,8 @@ const form_tp_data= tpdata=>{
     base : asset , // currency ,
     quote : market , // pair ,
     symbol : `${ asset }_${ market }` , // `${ currency }_${ pair }` ,
+    asset , 
+    market ,
     // PRECISION_PRICE : + metadata?.precision?.price ,
     // PRECISION_AMOUNT : + metadata?.precision?.amount  ,
     // LIMIT_AMOUNT_MIN : + metadata?.limits?.amount?.min ,
@@ -162,7 +167,7 @@ const set_redis_assets_unique = async ( { j_assets_unique } )=>{
   }
   return
 }
-const chargeup_user_wallets_by_assets = async ( { j_assets_unique , arr_bot_ids }) => {
+const chargeup_user_wallets_by_assets = async ( { j_assets_unique , arr_bot_ids } ) => {
    arr_assets = Object.keys( j_assets_unique ) 
    LOGGER ( {count : arr_assets?.length , arr_assets } ) //   process.exit ( 1 )
   let n_orders_placed = 0
@@ -176,9 +181,10 @@ const chargeup_user_wallets_by_assets = async ( { j_assets_unique , arr_bot_ids 
           amountchar : CHARGE_UPTO_TARGET_AMOUNT ,
           amountfloat : CHARGE_UPTO_TARGET_AMOUNT ,
           availchar : CHARGE_UPTO_TARGET_AMOUNT ,
-          availchar : CHARGE_UPTO_TARGET_AMOUNT ,
+          availfloat : CHARGE_UPTO_TARGET_AMOUNT ,
           lockedchar : 0 ,
           lockedfloat : 0 ,
+          uuid : uuid()
         },
         condition : { // userId : respuser?.id , //          type : 'SPOT' ,           currency : arr_assets[ idxasset ] 
           useruuid : respuser?.uuid , // username : // botid
@@ -268,10 +274,10 @@ const init_ping= async()=>{
   let respsetting = await findone( 'settings' , { key: 'ALIVE_PING_PERIOD_IN_SEC' , active : 1 })
   if ( Number.isFinite( +respsetting?.value ) ){ ALIVE_PING_PERIOD_IN_SEC = +respsetting?.value }
   else {}
-  try { axios.post ( `${ SCHEDULER?.URL }:${ SCHEDULER?.PORT_HTTP }/workers/ping` , { name : MAP_WORKERTYPE?.CHARGER }).then( console.log ) } 
+  try { axios.post ( `${ SCHEDULER?.URL }:${ SCHEDULER?.PORT_HTTP }/workers/ping` , { name : MAP_WORKERTYPE?.CHARGER }).then( resp => { LOGGER ( resp?.data )}) } 
   catch ( err ){ console.log ( err ) }
   h_interval_ping = setInterval ( async () => {
-    try { axios.post ( `${ SCHEDULER?.URL }:${ SCHEDULER?.PORT_HTTP }/workers/ping` , { name : MAP_WORKERTYPE?.CHARGER }).then( console.log ) } 
+    try { axios.post ( `${ SCHEDULER?.URL }:${ SCHEDULER?.PORT_HTTP }/workers/ping` , { name : MAP_WORKERTYPE?.CHARGER }).then( resp => { LOGGER ( resp?.data )}) } 
     catch ( err ){ console.log ( err ) }
   } , ALIVE_PING_PERIOD_IN_SEC * 1000 )
 }

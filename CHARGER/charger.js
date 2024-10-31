@@ -65,7 +65,7 @@ const ensure_exists_or_create_users = async () => {
       createdAt : timenow ,
       updatedAt : timenow ,
     })}
-    await redisclihash.hset ( KEYNAMES?.REDIS?.APIKEY , arr_bot_emails[ idxbot ] , respapikey?.key )
+    await redisclihash.hset ( KEYNAMES?.REDIS?.USERUUID_APIKEY , arr_bot_emails[ idxbot ] , respapikey?.key )
   }
 }
 // const newKey = await models.apiKey.create({

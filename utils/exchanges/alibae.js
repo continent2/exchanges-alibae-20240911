@@ -44,7 +44,7 @@ const get_orderbook = async ( { base , quote , limit } )=>{
 }
 let arr_useremail_apikeys
 const get_user_apikeys_from_db = async ()=>{
-  let j_useremail_keys = await rediscli.hgetall ( KEYNAMES?.REDIS?.APIKEY )
+  let j_useremail_keys = await rediscli.hgetall ( KEYNAMES?.REDIS?.USERUUID_APIKEY )
   let arr_useremails = Object.keys ( j_useremail_keys )
   if ( arr_useremail_apikeys?.length ){}
   else { arr_useremail_apikeys = await get_user_apikeys_from_db () } 

@@ -3,8 +3,9 @@ const { uuid } = require ( './common')
 
 const updaterows = async(table,jfilter,jupdates)=>  { return await db[table].update(jupdates,{where:jfilter}) }
 
-const findall = async (table, jfilter) => {
-  return await db[table].findAll({ raw: true, where: jfilter });
+const findall = async (table, jfilter , attributes ) => {
+  if ( attributes){ return await db[table].findAll({ raw: true, where: jfilter , attributes}) }
+  else {            return await db[table].findAll({ raw: true, where: jfilter , })}
 }
 const findone=async(table,jfilter)=>          { return await db[table].findOne({raw:true,where:jfilter})}
 const upsert = async ( { db , table , values, condition } ) => {  

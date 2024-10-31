@@ -111,7 +111,7 @@ router.post ( '/action/:actiontype/:workertype' , async (req,res)=>{
     break
   }
 } )
-router.post ( '/ping' , async (req,res) =>{
+router.post ( '/ping' , async (req,res) => {
   let { name , } = req?.body
   if ( MAP_WORKERTYPE[ name ]){ }
   else { resperr(res, messages?.MSG_ARGINVALID) ; return }
